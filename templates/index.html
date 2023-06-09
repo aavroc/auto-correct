@@ -1,0 +1,17 @@
+<!-- templates/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Data Listing</title>
+</head>
+<body>
+    <h1>Autocorrect Assignments</h1>
+    <ul>
+        {% for item in data %}
+          <li>
+            <a href="{{ url_for('correct', assignment_id=item.assignment_id) }}">{{ item.course_name }}, {{ item.assignment_name }}</a>
+          </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
