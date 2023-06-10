@@ -10,6 +10,19 @@
           resize: both;  /* Allow the user to resize the textarea */
       }
     </style>
+    <script>
+        function updateCheckboxValue(i) {
+            var visibleCheckbox = document.getElementById("cb_" + i);
+            var hiddenCheckboxValue = document.getElementById("hidden_checkbox_" + i);
+
+            if (visibleCheckbox.checked) {
+                hiddenCheckboxValue.value = "1";
+            } else {
+                hiddenCheckboxValue.value = "0";
+            }
+        }
+    </script>
+
 </head>
 
 <body>
@@ -21,7 +34,8 @@
                     <h3 class="mb-3">{{ item['user'] }}</h2>
                 
                     <input id="aid_{{ loop.index }}" type="hidden" name="assignment_id[]" value="{{ item['assignment_id'] }}">
-                    <input id="sid_{{ loop.index }}" type="hidden" name="submission_id[]" value="{{ item['submission'] }}">
+                    <input id="sid_{{ loop.index }}" type="hidden" name="submission_id[]" value="{{ item['submission_id'] }}">
+                    <input id="cid_{{ loop.index }}" type="hidden" name="course_id[]" value="{{ item['course_id'] }}">
 
                     <div class="form-group row">
                         <label for="file_content" class="col-sm-2 col-form-label">File Content:</label>
@@ -39,7 +53,7 @@
                     <div class="form-group row">
                         <label for="words_correct" class="col-sm-2 col-form-label">Words correct:</label>
                         <div class="col-sm-10">
-                            <input type="text" id="words_correct__{{ loop.index }}" value="{{ item['words'] }}" class="form-control" readonly>
+                            <input type="text" id="words_correct__{{ loop.index }}" value="{{ item['words_correct'] }}" class="form-control" readonly>
                         </div>
                     </div>
 
@@ -60,7 +74,8 @@
                     <div class="form-group row  text-right">
                         <div class="col-sm-10">
                             Rate: 
-                            <input type="checkbox" id="cb_{{ loop.index }}" name="checked[]" value="1" checked>
+                            <input type="checkbox" id="cb_{{ loop.index }}" name="check_box[]" onchange="updateCheckboxValue({{loop.index}})" checked>
+                            <input type="hidden" name="checked[]" id="hidden_checkbox_{{loop.index}}" value="1">
                         </div>
                     </div>
                         
