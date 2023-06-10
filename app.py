@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from canvasapi import Canvas
 import requests
 import sys
@@ -14,7 +14,7 @@ API_KEY = "17601~V6FUc7Xvc07XkCMxJtDVJlpN7RiugCbaodIJ6pUzfnxTZ7S44eRs7yGW7jKc0hO
 feedback = 'Top gedaan!'
 
 data = [
-    {"course_id": 6585, "assignment_id": 117166, "rating":10, "words_in_order": ["localhost", "games", "root", "$conn1" ,"localhost", "artiesten", "roc-student", "welkom123", "$conn2" ], 'feedback':feedback},
+    {"course_id": 6585, "assignment_id": 117166, "rating":10, "words_in_order": ["localhost", "games", "root","localhost", "artiesten", "roc-student", "welkom123", "$conn2" ], 'feedback':feedback},
     {"course_id": 6585, "assignment_id": 117167, "rating":10, "words_in_order": ["aappp","php", "localhost", "insert", "into", "producten", "values", "Playstation "], 'feedback':feedback},
 ]
 
@@ -75,7 +75,7 @@ def listUnratedAssignments(item):
         # Check if the submission is already graded
         if submission.submitted_at is None or submission.workflow_state == 'graded':
             continue
-
+        
         for attachment in submission.attachments:
             response = requests.get(attachment.url, allow_redirects=True)
             if response.status_code != 200:
@@ -101,11 +101,12 @@ def listUnratedAssignments(item):
                 rating=0
                 feedback='Niet helemaal goed'
 
-            list_of_dicts.append({'assignment_id':assignment_id,'submission':submission.id,
+            list_of_dicts.append({'assignment_id':assignment_id,'assignment_name':assignment.name,
+            'course_name':course.name,'submission':submission.id,
             'rating':rating, 'feedback':feedback,'user':submission.user['name'], 'file_content':file_content,
             'words_in_order':words_in_order,'words_correct':words_correct})
 
-        return(list_of_dicts)
+    return(list_of_dicts)
 
 def autoGrade(course_id, assignment_id, rating, search_words):
     try:
@@ -127,8 +128,6 @@ def autoGrade(course_id, assignment_id, rating, search_words):
         # Check if the submission is already graded
         if submission.submitted_at is None or submission.workflow_state == 'graded':
             continue
-
-        print(f" ** Checking student: {submission.user['name']} (ID: {submission.user_id})")
 
         for attachment in submission.attachments:
             response = requests.get(attachment.url, allow_redirects=True)
@@ -165,9 +164,32 @@ def correct(assignment_id):
     for item in data:
         if ( int(assignment_id)==int(item['assignment_id']) ):
             results=listUnratedAssignments(item)
-
+    #return(results)
     return render_template('rate.html', data=results)
 
+@app.route('/submit-ratings', methods=['POST'])
+def submit_ratings():
+    # Get all the posted variables from the form
+    posted_variables = request.form
+
+    rating_values = request.form.getlist('rating[]')
+    feedback_values = request.form.getlist('feedback[]')
+    checked_values = request.form.getlist('checked[]')
+    submission_id_values = request.form.getlist('submission_id[]')
+    assignment_id_values = request.form.getlist('assignment_id[]')
+
+    print(submission_id_values)
+
+    # Print the posted variables
+    for key, value in posted_variables.items():
+        print(f'{key}: {value}')
+
+    # Return a response to the client
+    return 'Form submission successful'
+
+@app.route('/test')
+def test():
+    return render_template('test.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
