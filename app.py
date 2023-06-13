@@ -139,7 +139,7 @@ def listUnratedAssignments(item):
             list_of_dicts.append({'assignment_id':assignment_id,'assignment_name':assignment.name,
             'course_id':course.id,'course_name':course.name,'submission_id':submission.id,
             'rating':assignment.points_possible, 'feedback':feedback,'user':submission.user['name'], 'file_content':file_content,
-            'words_in_order':words_in_order,'words_correct':words_correct,'hint':item.get('hint','')})
+            'words_in_order':words_in_order,'words_correct':words_correct,'hint':item.get('hint',''),'number_of_att':len(submission.attachments)})
 
     return(list_of_dicts)
 
@@ -226,23 +226,9 @@ def update_grade_and_feedback(posted_variables):
     return(output)
 
 
-@app.route('/moved-refresh-list')
-def moved_refresh_list():
-    
-    data = data = listAssignments()
-
-    filename = 'data.json'
-    if os.path.isfile(filename): os.remove(filename)
-
-    with open('filename', 'w') as f:  # open file in write mode
-        json.dump(data, f)  # write data to file in JSON format
-
-    return redirect(url_for('index'))
-
-
-@app.route('/moved')
-def moved_index():
-    section()
+@app.route('/')
+def index():
+    return redirect(url_for('section.section_list'))
 
 @app.route('/correct/<assignment_id>')
 def correct(assignment_id):
