@@ -1,2 +1,3 @@
 myflaskapp/config.py
+myflaskapp/__pycache__/*
 static/temp/*
