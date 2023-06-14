@@ -24,7 +24,7 @@ canvas = Canvas(API_URL, API_KEY)
 canvas = Canvas(API_URL, API_KEY)
 
 def readCanvas():
-    response = requests.get('http://localhost:8080/api/nakijken?s=yii')  # Replace with your actual URL
+    response = requests.get('http://c22.cmon.ovh/api/nakijken?s=yii')  # Replace with your actual URL
 
     # Ensure we have a valid response
     if response.status_code == 200:
