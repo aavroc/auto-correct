@@ -1,6 +1,6 @@
 feedback='Top job!'
 
-data = [
+test_data = [
     {"course_id": 6585, "assignment_id": 117166, "rating":10,  'file_type':'php', "words_in_order": ["localhost", "games", "root","localhost", "artiesten", "roc-student", "welkom123", "$conn2" ], 'feedback':feedback},
     {"course_id": 6585, "assignment_id": 117167, "rating":10,  'file_type':'php', "words_in_order": ["php", "localhost", "insert", "into", "producten", "values", "Playstation "], 'feedback':feedback},
     

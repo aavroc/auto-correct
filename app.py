@@ -6,13 +6,13 @@ import sys
 from pathlib import Path
 import os
 import json
-from datetime import datetime
 import glob
 
 from myflaskapp.mydata import data
 from myflaskapp.config import config
 
 from controls.section import section
+#from controls.correct import correct
 
 app = Flask(__name__)
 
@@ -23,6 +23,7 @@ API_KEY = config['API_KEY']
 default_feedback = config['default_feedback']
 
 app.register_blueprint(section, url_prefix="")
+#app.register_blueprint(correct, url_prefix="")
 
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, API_KEY)
@@ -43,26 +44,6 @@ def rateSubmission(submission, rating, feedback, test=1):
         #submission.edit(submission={'posted_grade': rating})
         #submission.edit(comment= {'text_comment': feedback}))
 
-def moved_listAssignments():
-    # Create a list of available assignments that can be auto graded
-    list_of_dicts=[]
-    for item in data:
-        course_id=item['course_id']
-        assignment_id=item['assignment_id']
-
-        try:
-            course = canvas.get_course(course_id)
-            assignment = course.get_assignment(assignment_id)
-        except:
-            print(f"No access to course {course_id} and/or assignment {assignment_id}")
-
-        # Get all submissions
-        # submissions = assignment.get_submissions()
-
-        list_of_dicts.append({'course_id':course_id, 'course_name':course.name,'assignment_id':assignment_id,'assignment_name':assignment.name, 'points_possible':assignment.points_possible,})
-
-    return(list_of_dicts)
-
 def listUnratedAssignments(item):
     course_id=item['course_id']
     assignment_id=item['assignment_id']
@@ -82,7 +63,7 @@ def listUnratedAssignments(item):
     # Get all submissions
     submissions = assignment.get_submissions(include=['user'])
 
-    removeTempFiles()
+    # removeTempFiles() # ToDo remove files when rating is done!
 
     # Process each submission
     for i, submission in enumerate(submissions):
@@ -104,14 +85,19 @@ def listUnratedAssignments(item):
             if ( file_type == 'png' ):
                 #save file
                 path='static/temp'
-                page = requests.get(attachment.url)
+                
                 if not os.path.exists(path):
                     os.makedirs(path)
                 # png_filename = attachment.filename
-                png_filename = datetime.now().strftime('%H%M%S%f')+'-'+str(i)+'.png'
+                png_filename = str(course_id)+'-'+str(assignment_id)+'-'+str(submission.id)+'-'+str(attachment.id)+'.png'
+                png_filename = str(course_id)+'-'+str(attachment.id)+'.png'
                 fn = os.path.join(path,png_filename)
-                with open(fn, 'wb') as f:
-                    f.write(page.content)
+
+                if not os.path.isfile(fn):
+                    page = requests.get(attachment.url)
+                    with open(fn, 'wb') as f:
+                        f.write(page.content)
+
                 file_content = 'fn:'+fn
                 rating=item.get('rating','')
                 feedback=item.get('feedback',default_feedback)

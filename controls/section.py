@@ -10,7 +10,7 @@ import sys
 API_URL = config['API_URL']
 # Canvas API key
 API_KEY = config['API_KEY']
-default_feedback = config['default_feedback']
+# not needed? default_feedback = config['default_feedback']
 
 data_cache='data_cache.json'
 
@@ -22,9 +22,20 @@ canvas = Canvas(API_URL, API_KEY)
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, API_KEY)
 
+def readCanvas():
+    response = requests.get('http://localhost:8080/api/nakijken?s=yii')  # Replace with your actual URL
+
+    # Ensure we have a valid response
+    if response.status_code == 200:
+        data = response.json()
+    else:
+        print(f"Error: {response.status_code}")
+
+    return
+
 def listAssignments():
     # Create a list of available assignments that can be auto graded
-    print(f"section.listAssignments()")
+
     list_of_dicts=[]
     for item in data:
         course_id=item['course_id']
