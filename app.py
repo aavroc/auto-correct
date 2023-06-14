@@ -8,8 +8,8 @@ import os
 import json
 import glob
 
-from myflaskapp.mydata import data
 from myflaskapp.config import config
+from myflaskapp.config import data_cache
 
 from controls.section import section
 #from controls.correct import correct
@@ -218,6 +218,13 @@ def index():
 
 @app.route('/correct/<assignment_id>')
 def correct(assignment_id):
+    data_cache='data_cache.json'
+    filename=data_cache
+    if os.path.isfile(filename):  # check if file/cache exists
+        with open(filename, 'r') as f: 
+            data = json.load(f) 
+    else:
+       return render_template('rate.html', data='') 
     for item in data:
         if ( int(assignment_id)==int(item['assignment_id']) ):
             results=listUnratedAssignments(item)

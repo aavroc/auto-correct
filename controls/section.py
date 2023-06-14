@@ -5,6 +5,7 @@ import json
 from myflaskapp.mydata import data
 from myflaskapp.config import config
 import sys
+import requests
 
 # Canvas API URL
 API_URL = config['API_URL']
@@ -27,14 +28,19 @@ def readCanvas():
 
     # Ensure we have a valid response
     if response.status_code == 200:
-        data = response.json()
+        json_data = response.json()
     else:
         print(f"Error: {response.status_code}")
 
-    return
+    with open(data_cache, 'w') as f:
+        f.write(str(json_data))
+
+    return json_data
 
 def listAssignments():
     # Create a list of available assignments that can be auto graded
+
+    return readCanvas()
 
     list_of_dicts=[]
     for item in data:
