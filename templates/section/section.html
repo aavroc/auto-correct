@@ -27,21 +27,20 @@
 <body>
   <h2><div class="container" id="busy" style="display: none;width:500px;">Working....</div></body></html></h2>
   <div class="container" id="main">
-      <h1>Select an assignment</h1>
-      <hr>
-        <ul>
-          {% for item in data %}
-            <li>
-              <a href="{{ url_for('correct', assignment_id=item.assignment_id) }}" onclick="event.preventDefault(); refresh(this.href);">{{ item.course_name }}, {{ item.assignment_name }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-      <hr>
-      <div class="button-container">
-        <a href="{{ url_for('section.section_list') }}" class="button blue-button">Home</a>
-        <a href="{{ url_for('section.section_refresh') }}" class="button green-button" onclick="event.preventDefault(); refresh(this.href);">Refresh</a>
-      </div>
-      </div>
+    <h2>{{data[0]['module_name']}} ({{data[0]['module_id']}})</h2>
+    <hr>
+      <ul>
+      {% for item in data %}
+        <li>
+        <a href="{{ url_for('correct', assignment_id=item.assignment_id) }}" onclick="event.preventDefault(); refresh(this.href);">{{ item.course_name }}, {{ item.assignment_name }}</a>
+        </li>
+      {% endfor %}
+      </ul>
+    <hr>
+    <div class="button-container">
+      <a href="{{ url_for('section.section_list') }}" class="button blue-button">Home</a>
+      <a href="{{ url_for('section.section_refresh',module_id=data[0]['module_id']) }}" class="button green-button" onclick="event.preventDefault(); refresh(this.href);">Refresh</a>
+    </div>
   </div>
 
   <div class="stripe"></div>

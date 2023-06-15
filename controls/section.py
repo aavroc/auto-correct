@@ -23,8 +23,10 @@ canvas = Canvas(API_URL, API_KEY)
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, API_KEY)
 
-def readCanvas():
-    response = requests.get('http://c22.cmon.ovh/api/nakijken?s=yii')  # Replace with your actual URL
+def readCanvas(module_id):
+    url = 'http://c21.cmon.ovh/api/nakijken?mid='+module_id
+    print(f"url: {url}")
+    response = requests.get(url)  # Replace with your actual URL
 
     # Ensure we have a valid response
     if response.status_code == 200:
@@ -37,10 +39,10 @@ def readCanvas():
 
     return json_data
 
-def listAssignments():
+def listAssignments(module_id):
     # Create a list of available assignments that can be auto graded
 
-    return readCanvas()
+    return readCanvas(module_id)
 
     list_of_dicts=[]
     for item in data:
@@ -77,10 +79,10 @@ def section_list():
     else:
         return render_template('section/results.html', data='Done')
 
-@section.route('/section/refresh')
-def section_refresh():
+@section.route('/section/refresh/<module_id>')
+def section_refresh(module_id):
     
-    data = listAssignments()
+    data = listAssignments(module_id)
 
     filename = data_cache
     print(f"fn: {filename} ")
