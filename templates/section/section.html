@@ -11,35 +11,56 @@
       document.getElementById('main').style.display = 'none';
       document.getElementById('busy').style.display = 'block';
 
-    setInterval(function() {
-      var myDiv = document.getElementById('busy');
-      myDiv.textContent = myDiv.textContent + '.';
-    }, 400);
+      setInterval(function() {
+        var myDiv = document.getElementById('busy');
+        myDiv.textContent = myDiv.textContent + '.';
+      }, 400);
   
       // Redirect to the new URL
       window.location.href = url;
     }
     
   </script>
+  <style>
+    small {
+      color:#909090;
+    }
+    a.myLink {
+      color: blue; /* set the color of the link */
+      text-decoration: none; /* remove the underline */
+      padding: 10px 20px;
+    }
+
+    a.myLink:visited {
+        color: blue; /* set the color of visited link */
+    }
+
+    a.myLink:hover {
+        background-color: rgba(255, 255, 0, 0.348); /* set the background color when hovering */
+        padding: 0px 20px; /* set the size of the button when hovering */
+        color: black; /* set the color of the link text when hovering */
+    }
+  </style>
 
 </head>
 
 <body>
-  <h2><div class="container" id="busy" style="display: none;width:500px;">Working....</div></body></html></h2>
+  <h2><div class="container" id="busy" style="display: none;width:500px;">Working....</div></h2>
   <div class="container" id="main">
-    <h2>{{data[0]['module_name']}} ({{data[0]['module_id']}})</h2>
+    <h2>{{data[0]['cohort']|upper}} {{data[0]['module_name']}}</h2>
+    <small>(module ID: {{data[0]['module_id']}})</small>
     <hr>
-      <ul>
+      <ol>
       {% for item in data %}
         <li>
-        <a href="{{ url_for('correct', assignment_id=item.assignment_id) }}" onclick="event.preventDefault(); refresh(this.href);">{{ item.course_name }}, {{ item.assignment_name }}</a>
+        <a href="{{ url_for('correct', assignment_id=item.assignment_id) }}" class="myLink" onclick="event.preventDefault(); refresh(this.href);">{{ item.course_name }}, {{ item.assignment_name }}</a>
         </li>
       {% endfor %}
-      </ul>
+      </ol>
     <hr>
     <div class="button-container">
       <a href="{{ url_for('section.section_list') }}" class="button blue-button">Home</a>
-      <a href="{{ url_for('section.section_refresh',module_id=data[0]['module_id']) }}" class="button green-button" onclick="event.preventDefault(); refresh(this.href);">Refresh</a>
+      <a href="{{ url_for('section.section_refresh',cohort='c22',module_id=data[0]['module_id']) }}" class="button green-button" onclick="event.preventDefault(); refresh(this.href);">Refresh</a>
     </div>
   </div>
 

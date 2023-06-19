@@ -13,9 +13,10 @@
             width: 400px;
             transition: width 0.5s ease;
             height: auto;
-            box-shadow: 5px 5px 10px #000, 
+            _box-shadow: 5px 5px 10px #000, 
                 -5px -5px 10px #fff;
-            border: solid 1px #000;
+            _border: solid 1px #000;
+            margin-top:15px;
         }
         img:hover {
             width:890px;
@@ -33,6 +34,11 @@
             box-shadow: 0px 10px 30px -5px rgba(0, 0, 0, 0.1), 
                     0px 20px 60px -10px rgba(0, 0, 0, 0.2);
         }
+        .read-only-box {
+            background-color:#FDFCF2;
+            border:1px solid;
+            padding: .375rem .75rem;
+        }
     </style>
     <script>
         function updateCheckboxValue(i) {
@@ -48,15 +54,32 @@
         function toggleFullSize(img) {
             img.classList.toggle('fullsize');
         }
+        function addImage(src, id) {
+            var img = document.createElement('img');
+
+            img.src = src;
+            img.onclick = function() { toggleFullSize(this); };
+            img.alt = 'Uploaded additional Image';
+
+            var div = document.getElementById(id);
+            div.appendChild(img);
+            div.appendChild(document.createElement('br'))
+        }
     </script>
 
 </head>
 
 <body style='background-color:#f8f8f8'>
     <div class="container mt-5">
-        <form action="/submit-ratings" method="POST">
-            
+        <form action="/submit-ratings" method="POST">    
+
             {% for item in data %}
+
+                {% if item['png_att_nr'] > 1 %}
+                    <script>window.onload=addImage('/{{ item['file_content'][3:] }}', {{ item['submission_id'] }})</script>
+                    {% continue %}
+                {% endif %}
+
                 <div class="card mb-4 p-3 paper">
                     <h3 class="mb-3">#{{loop.index}} : {{ item['course_name']}} - {{item['assignment_name']}} </h3>
 
@@ -67,31 +90,32 @@
                     <input id="cid_{{ loop.index }}" type="hidden" name="course_id[]" value="{{ item['course_id'] }}">
 
                     <div class="form-group row">
-                        <label for="Hint" class="col-sm-2 col-form-label">Hint:</label>
-                        <div class="col-sm-10">
-                            <input type="text" value="{{ item['hint'] }}" class="form-control" readonly>
+                        <div class="col-sm-12">
+                            <div class="read-only-box" style="background-color:#FDFCF2;">
+                                {{ item['hint'] }}
+                            </div>
                         </div>
                     </div>
 
                     <div class="form-group row">
                         <label for="Hint" class="col-sm-2 col-form-label">Attachments:</label>
                         <div class="col-sm-2">
-                            <input type="text" value="{{ item['number_of_att'] }}" size="4" class="form-control" readonly>
+                            <div class="col-form-label">
+                                {{ item['number_of_att'] }}
+                            </div>
                         </div>
                     </div>
 
                     <div class="form-group row">
                         
-                        <label for="file_content" class="col-sm-2 col-form-label">File Content:</label>
+                        <label for="file_content" class="col-sm-2 col-form-label"></label>
 
                         {% if item['file_content'][:3] == 'fn:' %}
-                            <div class="col-sm-10">
-                                <img src="/{{ item['file_content'][3:] }}" onclick="toggleFullSize(this)" alt="My Image">
-                                <br>
-                                <small>{{ item['file_content'][3:] }}</small>
+                            <div id="{{item['submission_id']}}" class="col-sm-10">
+                                <img src="/{{ item['file_content'][3:] }}" onclick="toggleFullSize(this)" alt="First Image"><br>
                             </div>
                         {% else %}
-                            <div class="col-sm-10">
+                            <div id="{{item['submission_id']}}" class="col-sm-10">
                                 <textarea id="file_content_{{ loop.index }}" class="form-control" rows="15">{{ item['file_content'] }}</textarea>
                             </div>
                         {% endif %}
@@ -101,13 +125,27 @@
                         <div class="form-group row">
                             <label for="words_found" class="col-sm-2 col-form-label">Words found:</label>
                             <div class="col-sm-10">
-                                <input type="text" id="words_found_{{ loop.index }}" value="{{ item['words_in_order'] | join(' ') }}" class="form-control" readonly>
+                                <div id="words_found_{{ loop.index }}" class="form-control">
+                                    {# {{ item['words_in_order'] | join(' ') }} #}
+                                    {% for word in item['words_in_order'] %}
+                                        {% if loop.index <= item['words_correct'] %}
+                                            <span style="font-weight:bold;color:green;">{{ word }}</span>
+                                        {% else %}
+                                            <span style="font-weight:bold;color:red;">{{ word }}</spaan>
+                                        {% endif %}
+                                    {% endfor %} 
+                                </div>
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="words_correct" class="col-sm-2 col-form-label">Words correct:</label>
-                            <div class="col-sm-10">
-                                <input type="text" id="words_correct__{{ loop.index }}" value="{{ item['words_correct'] }}" class="form-control" readonly>
+                            <div class="col-sm-2">
+                                <div id="words_correct__{{ loop.index }}" class="form-control">
+                                    {{ item['words_correct'] }}
+                                    {% if item['words_correct'] == item['number_of_words'] %}
+                                        (all)
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     {% endif %}

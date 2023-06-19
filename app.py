@@ -15,6 +15,7 @@ from controls.section import section
 #from controls.correct import correct
 
 app = Flask(__name__)
+app.jinja_env.add_extension('jinja2.ext.loopcontrols')
 
 # Canvas API URL
 API_URL = config['API_URL']
@@ -59,6 +60,7 @@ def listUnratedAssignments(item):
         assignment = course.get_assignment(assignment_id)
     except:
         print(f"No access to course {course_id} and/or assignment {assignment_id}")
+        return render_template('results.html', data="No API access to course {course_id} and/or assignment {assignment_id}")
 
     # Get all submissions
     submissions = assignment.get_submissions(include=['user'])
@@ -67,31 +69,39 @@ def listUnratedAssignments(item):
 
     # Process each submission
     for i, submission in enumerate(submissions):
+
         # Check if the submission is already graded
+        # print(submission.user['name'], submission.submitted_at, submission.workflow_state)
         if submission.submitted_at is None or submission.workflow_state == 'graded':
             continue
-        
+
+        print(f"Iteration submissions {i} is an not-graded submission")
+        png_att_nr=0
         for attachment in submission.attachments:
-            if Path(attachment.filename).suffix != '.'+file_type: # does the filename extentsion mach the required one?
+
+            if Path(attachment.filename).suffix.lower() != '.'+file_type.lower(): # does the filename extentsion mach the required one?
+                print(f"Unknown file suffix {Path(attachment.filename).suffix.lower()}")
                 continue
 
             if ( file_name != '' and file_name not in attachment.filename ): # when defined, check if the filename is correct.
                 continue
+
             response = requests.get(attachment.url, allow_redirects=True)
             if response.status_code != 200:
                 print(f"Failed to download file: {attachment['url']}")
                 continue
             
-            if ( file_type == 'png' ):
+            if ( file_type.lower() == 'png' ):
+                print("Found png")
                 #save file
-                path='static/temp'
+                path='static/temp/'
                 
                 if not os.path.exists(path):
                     os.makedirs(path)
                 # png_filename = attachment.filename
                 png_filename = str(course_id)+'-'+str(assignment_id)+'-'+str(submission.id)+'-'+str(attachment.id)+'.png'
                 png_filename = str(course_id)+'-'+str(attachment.id)+'.png'
-                fn = os.path.join(path,png_filename)
+                fn = path+png_filename
 
                 if not os.path.isfile(fn):
                     page = requests.get(attachment.url)
@@ -102,8 +112,11 @@ def listUnratedAssignments(item):
                 rating=item.get('rating','')
                 feedback=item.get('feedback',default_feedback)
                 words_correct=-99
+                png_att_nr+=1
             else:
+                print("File content: ")
                 file_content = response.content.decode()
+                print(f"{file_content}")
 
                 pos = 0
                 words_correct = 0
@@ -116,16 +129,20 @@ def listUnratedAssignments(item):
                         words_correct+=1
 
                 if (pos > 1):
-                    rating=item.get('rating','0')
+                    rating=assignment.points_possible
                     feedback=item.get('feedback',default_feedback)
                 else:
                     rating=0
                     feedback='Niet helemaal goed'
 
+
             list_of_dicts.append({'assignment_id':assignment_id,'assignment_name':assignment.name,
             'course_id':course.id,'course_name':course.name,'submission_id':submission.id,
-            'rating':assignment.points_possible, 'feedback':feedback,'user':submission.user['name'], 'file_content':file_content,
-            'words_in_order':words_in_order,'words_correct':words_correct,'hint':item.get('hint',''),'number_of_att':len(submission.attachments)})
+            'rating':rating, 'feedback':feedback,'user':submission.user['name'],
+            'file_content':file_content, 'words_in_order':words_in_order,'words_correct':words_correct,
+            'number_of_words':len(words_in_order),
+            'hint':item.get('hint',''),
+            'png_att_nr':png_att_nr, 'number_of_att':len(submission.attachments)})
 
     return(list_of_dicts)
 
@@ -228,8 +245,37 @@ def correct(assignment_id):
     for item in data:
         if ( int(assignment_id)==int(item['assignment_id']) ):
             results=listUnratedAssignments(item)
-    #return(results)
+            return render_template('rate.html', data=results)
+
+    return "None"
     return render_template('rate.html', data=results)
+
+@app.route('/correcta/<cohort>/<assignment_id>')
+def correcta(cohort, assignment_id):
+    # read API data
+    url = 'http://'+cohort+'.cmon.ovh/api/nakijken?aid='+assignment_id
+    print(f"url: {url}")
+    response = requests.get(url) 
+
+    if response.status_code == 200:
+        data = response.json()
+    else:
+        print(f"Error: {response.status_code}")
+        return(f"Error: {response.status_code}")
+
+    # print("Data-len: "+str(len(data)))
+    # print (data)
+        
+    if not data:
+        return render_template('results.html', data="No Data from Canvas API")
+
+    for item in data:
+        if ( int(assignment_id)==int(item['assignment_id']) ):
+            results=listUnratedAssignments(item)
+            return render_template('rate.html', data=results) # stop after first hit
+
+    return
+
 
 @app.route('/submit-ratings', methods=['POST'])
 def submit_ratings():
