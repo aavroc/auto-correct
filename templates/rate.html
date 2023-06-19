@@ -34,9 +34,16 @@
             box-shadow: 0px 10px 30px -5px rgba(0, 0, 0, 0.1), 
                     0px 20px 60px -10px rgba(0, 0, 0, 0.2);
         }
-        .read-only-box {
+        .marked-box {
             background-color:#FDFCF2;
             border:1px solid;
+            border-color: #c0c0c0;
+            padding: .375rem .75rem;
+        }
+        .read-only-box {
+            background-color:#fdfdfd;
+            border:1px solid;
+            border-color: #c0c0c0;
             padding: .375rem .75rem;
         }
     </style>
@@ -91,7 +98,7 @@
 
                     <div class="form-group row">
                         <div class="col-sm-12">
-                            <div class="read-only-box" style="background-color:#FDFCF2;">
+                            <div class="marked-box" style="background-color:#FDFCF2;">
                                 {{ item['hint'] }}
                             </div>
                         </div>
@@ -125,7 +132,7 @@
                         <div class="form-group row">
                             <label for="words_found" class="col-sm-2 col-form-label">Words found:</label>
                             <div class="col-sm-10">
-                                <div id="words_found_{{ loop.index }}" class="form-control">
+                                <div id="words_found_{{ loop.index }}" class="form-control read-only-box">
                                     {# {{ item['words_in_order'] | join(' ') }} #}
                                     {% for word in item['words_in_order'] %}
                                         {% if loop.index <= item['words_correct'] %}
@@ -140,7 +147,7 @@
                         <div class="form-group row">
                             <label for="words_correct" class="col-sm-2 col-form-label">Words correct:</label>
                             <div class="col-sm-2">
-                                <div id="words_correct__{{ loop.index }}" class="form-control">
+                                <div id="words_correct__{{ loop.index }}" class="col-form-label">
                                     {{ item['words_correct'] }}
                                     {% if item['words_correct'] == item['number_of_words'] %}
                                         (all)
@@ -152,8 +159,13 @@
                     
                     <div class="form-group row">
                         <label for="rating" class="col-sm-2 col-form-label">Rating:</label>
-                        <div class="col-sm-10">
+                        <div class="col-sm-2">
                             <input type="text" id="rating_{{ loop.index }}" name="rating[]" value="{{ item['rating'] }}" class="form-control">
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="col-form-label" style="color:#707070">
+                                (Attempt {{item['attempt']}}, Points Possible {{item['points_possible']}})
+                            </div>
                         </div>
                     </div>
 
@@ -164,10 +176,10 @@
                         </div>
                     </div>
 
-                    <div class="form-group row  text-right">
-                        <div class="col-sm-10">
-                            Rate: 
-                            <input type="checkbox" id="cb_{{ loop.index }}" name="check_box[]" onchange="updateCheckboxValue({{loop.index}})" checked>
+                    <div class="form-group row">
+                        <label for="feedback" class="col-sm-2 col-form-label">Rate:</label>
+                        <div class="col-sm-4">
+                            &nbsp;&nbsp;<input type="checkbox" id="cb_{{ loop.index }}" name="check_box[]" onchange="updateCheckboxValue({{loop.index}})" style="transform: scale(1.5);" checked>
                             <input type="hidden" name="checked[]" id="hidden_checkbox_{{loop.index}}" value="1">
                         </div>
                     </div>

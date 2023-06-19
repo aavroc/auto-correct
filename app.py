@@ -48,7 +48,6 @@ def rateSubmission(submission, rating, feedback, test=1):
 def listUnratedAssignments(item):
     course_id=item['course_id']
     assignment_id=item['assignment_id']
-    rating=item.get('rating','0') # changed, getting from assignemtn (points_possible)
     words_in_order=item['words_in_order']
     file_type=item['file_type']
     file_name=item.get('file_name', "")
@@ -83,6 +82,7 @@ def listUnratedAssignments(item):
                 print(f"Unknown file suffix {Path(attachment.filename).suffix.lower()}")
                 continue
 
+            print(f"{file_name} check {attachment.filename}")
             if ( file_name != '' and file_name not in attachment.filename ): # when defined, check if the filename is correct.
                 continue
 
@@ -109,14 +109,11 @@ def listUnratedAssignments(item):
                         f.write(page.content)
 
                 file_content = 'fn:'+fn
-                rating=item.get('rating','')
                 feedback=item.get('feedback',default_feedback)
                 words_correct=-99
                 png_att_nr+=1
             else:
-                print("File content: ")
                 file_content = response.content.decode()
-                print(f"{file_content}")
 
                 pos = 0
                 words_correct = 0
@@ -135,10 +132,15 @@ def listUnratedAssignments(item):
                     rating=0
                     feedback='Niet helemaal goed'
 
+            rating = assignment.points_possible
+            if submission.attempt >3:
+                rating=int(int(rating)*0.8)
+
 
             list_of_dicts.append({'assignment_id':assignment_id,'assignment_name':assignment.name,
             'course_id':course.id,'course_name':course.name,'submission_id':submission.id,
-            'rating':rating, 'feedback':feedback,'user':submission.user['name'],
+            'rating':rating, 'attempt':submission.attempt,'points_possible':assignment.points_possible,
+            'feedback':feedback,'user':submission.user['name'],
             'file_content':file_content, 'words_in_order':words_in_order,'words_correct':words_correct,
             'number_of_words':len(words_in_order),
             'hint':item.get('hint',''),
