@@ -50,7 +50,7 @@ def listUnratedAssignments(item):
     assignment_id=item['assignment_id']
     words_in_order=item['words_in_order']
     file_type=item['file_type']
-    file_name=item.get('file_name', "")
+    file_name=item['file_name']
 
     list_of_dicts=[]
 
@@ -64,26 +64,22 @@ def listUnratedAssignments(item):
     # Get all submissions
     submissions = assignment.get_submissions(include=['user'])
 
-    # removeTempFiles() # ToDo remove files when rating is done!
+    # removeTempFiles() # ToDo remove files when rating is done!?
 
     # Process each submission
     for i, submission in enumerate(submissions):
 
         # Check if the submission is already graded
-        # print(submission.user['name'], submission.submitted_at, submission.workflow_state)
         if submission.submitted_at is None or submission.workflow_state == 'graded':
             continue
 
-        print(f"Iteration submissions {i} is an not-graded submission")
         png_att_nr=0
         for attachment in submission.attachments:
 
             if Path(attachment.filename).suffix.lower() != '.'+file_type.lower(): # does the filename extentsion mach the required one?
-                print(f"Unknown file suffix {Path(attachment.filename).suffix.lower()}")
                 continue
 
-            print(f"{file_name} check {attachment.filename}")
-            if ( file_name != '' and file_name not in attachment.filename ): # when defined, check if the filename is correct.
+            if ( file_name != None and file_name not in attachment.filename ): # when defined, check if the filename is correct.
                 continue
 
             response = requests.get(attachment.url, allow_redirects=True)
@@ -91,10 +87,9 @@ def listUnratedAssignments(item):
                 print(f"Failed to download file: {attachment['url']}")
                 continue
             
-            if ( file_type.lower() == 'png' ):
-                print("Found png")
-                #save file
-                path='static/temp/'
+            if ( file_type.lower() == 'png' ): # png, no word matching
+                
+                path='static/temp/' # save file to temp directory, ToDo when and how to clean temp dir?
                 
                 if not os.path.exists(path):
                     os.makedirs(path)
@@ -108,40 +103,53 @@ def listUnratedAssignments(item):
                     with open(fn, 'wb') as f:
                         f.write(page.content)
 
-                file_content = 'fn:'+fn
+                file_content = 'fn:'+fn # file content refers to a filename fn: <filename> which is the file name to the picture downloaded
                 feedback=item.get('feedback',default_feedback)
                 words_correct=-99
                 png_att_nr+=1
-            else:
+
+            else: # anything but a png file, do the word matching
+
                 file_content = response.content.decode()
 
                 pos = 0
+                negative_search = -1
                 words_correct = 0
+
                 for word in words_in_order:
-                    pos = file_content.lower().find(word.lower(), pos)
-                    if pos == -1:
+                    if word[0] == '!':
+                        print('Neg Search')
+                        negative_search = file_content.lower().find(word[1:].lower(), pos)
+                    else:
+                        print('Pos Search')
+                        pos = file_content.lower().find(word.lower(), pos)
+
+                    if pos == -1 or negative_search != -1:
                         # Word not found, stop searching
                         break
                     else:
                         words_correct+=1
 
-                if (pos > 1):
+                if (pos > 1): # pos is position of last found word and will be -1 when a word is not found.
                     rating=assignment.points_possible
                     feedback=item.get('feedback',default_feedback)
                 else:
                     rating=0
                     feedback='Niet helemaal goed'
 
+            # When more than 3 attempts max score is 80% of points_possible (max score)
             rating = assignment.points_possible
             if submission.attempt >3:
                 rating=int(int(rating)*0.8)
 
 
             list_of_dicts.append({'assignment_id':assignment_id,'assignment_name':assignment.name,
-            'course_id':course.id,'course_name':course.name,'submission_id':submission.id,
-            'rating':rating, 'attempt':submission.attempt,'points_possible':assignment.points_possible,
+            'course_id':course.id,'course_name':course.name,
+            'submission_id':submission.id, 'attempt':submission.attempt,
+            'rating':rating, 'points_possible':assignment.points_possible,
             'feedback':feedback,'user':submission.user['name'],
-            'file_content':file_content, 'words_in_order':words_in_order,'words_correct':words_correct,
+            'file_content':file_content, 'file_name':attachment.filename,
+            'words_in_order':words_in_order,'words_correct':words_correct,
             'number_of_words':len(words_in_order),
             'hint':item.get('hint',''),
             'png_att_nr':png_att_nr, 'number_of_att':len(submission.attachments)})

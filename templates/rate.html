@@ -31,6 +31,7 @@
         .paper {
             background-image: url("{{ url_for('static', filename='img/paper.avif') }}");
             background-repeat: repeat;
+            background-size:200%;
             box-shadow: 0px 10px 30px -5px rgba(0, 0, 0, 0.1), 
                     0px 20px 60px -10px rgba(0, 0, 0, 0.2);
         }
@@ -45,6 +46,16 @@
             border:1px solid;
             border-color: #c0c0c0;
             padding: .375rem .75rem;
+        }
+        .grey {
+            color:#707070;
+        }
+        .black-link {
+            color: #000000;
+            text-decoration: none; 
+        }
+        .black-link:hover {
+            color: #777777;
         }
     </style>
     <script>
@@ -82,13 +93,15 @@
 
             {% for item in data %}
 
+                <!-- This is a trick, when this picture is attachment number n and n>1,
+                     this picture is inserted into the DOM model and we skip the whole section where a rating form is created, Cool huh? -->
                 {% if item['png_att_nr'] > 1 %}
                     <script>window.onload=addImage('/{{ item['file_content'][3:] }}', {{ item['submission_id'] }})</script>
                     {% continue %}
                 {% endif %}
 
                 <div class="card mb-4 p-3 paper">
-                    <h3 class="mb-3">#{{loop.index}} : {{ item['course_name']}} - {{item['assignment_name']}} </h3>
+                    <h3 class="mb-3">#{{loop.index}} : {{ item['course_name']}} - <a href="https://talnet.instructure.com/courses/{{item['course_id']}}/assignments/{{item['assignment_id']}}" class="black-link" target=”_blank">{{item['assignment_name']}}</a></h3>
 
                     <h5 class="mb-3" style="color:blue;">{{ item['user'] }}</h5>
                 
@@ -106,9 +119,9 @@
 
                     <div class="form-group row">
                         <label for="Hint" class="col-sm-2 col-form-label">Attachments:</label>
-                        <div class="col-sm-2">
-                            <div class="col-form-label">
-                                {{ item['number_of_att'] }}
+                        <div class="col-sm-6">
+                            <div class="col-form-label grey">
+                               {{ item['number_of_att'] }}
                             </div>
                         </div>
                     </div>
@@ -124,6 +137,7 @@
                         {% else %}
                             <div id="{{item['submission_id']}}" class="col-sm-10">
                                 <textarea id="file_content_{{ loop.index }}" class="form-control" rows="15">{{ item['file_content'] }}</textarea>
+                                <small class="grey">{{item['file_name']}}</small>
                             </div>
                         {% endif %}
                     </div>
@@ -163,7 +177,7 @@
                             <input type="text" id="rating_{{ loop.index }}" name="rating[]" value="{{ item['rating'] }}" class="form-control">
                         </div>
                         <div class="col-sm-4">
-                            <div class="col-form-label" style="color:#707070">
+                            <div class="col-form-label grey">
                                 (Attempt {{item['attempt']}}, Points Possible {{item['points_possible']}})
                             </div>
                         </div>
