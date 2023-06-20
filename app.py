@@ -106,6 +106,7 @@ def listUnratedAssignments(item):
                 file_content = 'fn:'+fn # file content refers to a filename fn: <filename> which is the file name to the picture downloaded
                 feedback=item.get('feedback',default_feedback)
                 words_correct=-99
+                rating = assignment.points_possible # png is not rated automattically, propose higest score.
                 png_att_nr+=1
 
             else: # anything but a png file, do the word matching
@@ -117,7 +118,7 @@ def listUnratedAssignments(item):
                 words_correct = 0
 
                 for word in words_in_order:
-                    if word[0] == '!':
+                    if word and word[0] == '!':
                         print('Neg Search')
                         negative_search = file_content.lower().find(word[1:].lower(), pos)
                     else:
@@ -138,10 +139,9 @@ def listUnratedAssignments(item):
                     feedback='Niet helemaal goed'
 
             # When more than 3 attempts max score is 80% of points_possible (max score)
-            rating = assignment.points_possible
+            
             if submission.attempt >3:
                 rating=int(int(rating)*0.8)
-
 
             list_of_dicts.append({'assignment_id':assignment_id,'assignment_name':assignment.name,
             'course_id':course.id,'course_name':course.name,
