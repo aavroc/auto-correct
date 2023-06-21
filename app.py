@@ -169,7 +169,7 @@ def listUnratedAssignments(item):
                 file_name = loadPicture(attachment.url, file_name) # return file name with path
 
                 file_content = 'fn:'+file_name # file content refers to a filename fn: <filename> which is the file name to the picture downloaded
-                feedback=item.get('feedback',default_feedback)
+                feedback=getFeedback()
                 words_correct=-99
                 rating = assignment.points_possible # png is not rated automattically, propose higest score.
                 png_att_nr+=1
@@ -247,7 +247,7 @@ def update_grade_and_feedback(posted_variables):
 def index():
     results=loadFormData()
     if results:
-        return render_template('rate.html', data=results)
+        return render_template('rate.html', data=results, alreadySubmitted=1)
     
     return render_template('results.html', data="No Data in form cache")
 
@@ -282,7 +282,7 @@ def correcta(cohort, assignment_id):
     for item in data:
         if ( int(assignment_id)==int(item['assignment_id']) ):
             results=listUnratedAssignments(item)
-            return render_template('rate.html', data=results) # stop after first hit
+            return render_template('rate.html', data=results, alreadySubmitted=0) # stop after first hit
 
     return
 

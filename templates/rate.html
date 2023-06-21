@@ -204,7 +204,9 @@
 
             <div class="form-group row text-right">
                 <div class="col-sm-10 offset-sm-2">
+                    {% if alreadySubmitted == 0 %}
                     <button type="submit" class="btn btn-danger">Rate all checked </button>
+                    {% endif %}
                 </div>
             </div>
 

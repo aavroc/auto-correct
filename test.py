@@ -1,16 +1,24 @@
+import re
 
-import sys
+def validate_text(text, words):
+    pattern = r"\b{}\b".format(r"\b|\b".join(map(re.escape, words)))
+    matches = re.findall(pattern, text)
 
-data = [
-    {"course_id": 6585, "assignment_id": 117166, "rating":10, "words": ["localhost", "games", "root", "$conn1" ,"localhost", "artiesten", "roc-student", "welkom123", "$conn2" ]},
-    {"course_id": 6585, "assignment_id": 117167, "rating":10, "words": ["aappp","php", "localhost", "insert", "into", "producten", "values", "Playstation "]},
-]
+    print(pattern)
+    print (matches)
+    
+    # Validate the order of words
+    index = 0
+    for match in matches:
+        if match == words[index]:
+            index += 1
+            if index == len(words):
+                return True
+    return False
 
-def dd(variable):
-    print(variable)
-    sys.exit()
+# Example usage
+text = "xxxx word1 xxx xxxx word2 xxx word4 xxx word3 word5"
+word_list = ["word1", "word2", "(word3 word4)", "word5"]
 
-def listAssignments():
-    dd(data)
-
-listAssignments()
+valid = validate_text(text, word_list)
+print(valid)  # Output: True
