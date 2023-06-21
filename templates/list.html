@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List of JSON Files</title>
+</head>
+<body>
+    <h1>List of JSON Files</h1>
+    <ul>
+        {% for file in data %}
+            <li><a href="/{{file.name}}" >{{ file.name }} - Created on {{ file.creation_date }}</li></a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
