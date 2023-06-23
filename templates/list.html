@@ -1,14 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>List of JSON Files</title>
+    <title>Page for Testing/Debugging</title>
+    <script>
+        function toggleUL() {
+          var ul = document.getElementById("myUL");
+          if (ul.style.display === "none") {
+            ul.style.display = "block";
+          } else {
+            ul.style.display = "none";
+          }
+        }
+    </script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color:#f8f8f8;
+            margin:40px;
+        }
+        hr{
+            padding:20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>List of JSON Files</h1>
-    <ul>
+    <h1>Page for Testing/Debugging</h1><hr>
+    <a href="{{ url_for('validationtest') }}" class="btn btn-primary">Validation Test</a>&nbsp;
+    <a href="{{ url_for('index') }}" class="btn btn-primary">View Last Rating</a>
+    <hr>
+    <h3 onclick="toggleUL()">List of cached JSON Files (for testing)</h3>
+    <ul id="myUL" style="display:none;">
         {% for file in data %}
             <li><a href="/{{file.name}}" >{{ file.name }} - Created on {{ file.creation_date }}</li></a></li>
         {% endfor %}
     </ul>
+    <hr>
 </body>
 </html>

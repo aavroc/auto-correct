@@ -1,18 +1,16 @@
 # app.py
 from flask import Flask, render_template, request, redirect, url_for
-from canvasapi import Canvas
-import requests
-import sys
 from pathlib import Path
-import os
-import json
-import glob
-import random
+from canvasapi import Canvas
+import sys, os, json, glob, random, requests
 
+from myflaskapp.myForms import ValidationForm
 from myflaskapp.config import config
+from myflaskapp.validation import TextValidation
 
 app = Flask(__name__)
 app.jinja_env.add_extension('jinja2.ext.loopcontrols')
+app.config['SECRET_KEY'] = '083rhejwfdnslag9348uerfdijkcs398qCD'
 
 # Canvas API URL
 API_URL = config['API_URL']
@@ -47,7 +45,7 @@ def loadPicture(url, picture_file_name):
     
     return(file_name)
 
-def validateWords(words, text):
+def _validateWords(words, text):
     pos = 0
     negative_search = -1
     words_correct = 0
@@ -177,9 +175,13 @@ def listUnratedAssignments(item):
             else: # anything but a png file, do the word matching
 
                 file_content = response.content.decode()
-                words_correct, position = validateWords(words_in_order, file_content) #validate text(file_conten) with words (words must appear in text in order and !words may not exists in text)
+            # words_correct, position = validateWords(words_in_order, file_content) #validate text(file_conten) with words (words must appear in text in order and !words may not exists in text)
+                validation = TextValidation(file_content, words_in_order)
+                words_correct = validation.wordsMatched
+                match = validation.match
 
-                if (position > 1): # position of last found word and will be -1 when a word is not found.
+            #if (position > 1): # position of last found word and will be -1 when a word is not found.
+                if match:
                     rating=assignment.points_possible
                     feedback=getFeedback()
                 else:
@@ -297,6 +299,20 @@ def list():
     data=getFormdataFiles()
     print(f"Data: {data}")
     return render_template('list.html', data=data)
+
+@app.route('/validationtest', methods=['GET', 'POST'])
+def validationtest():
+    form = ValidationForm()
+    if form.validate_on_submit():
+        # set words in array
+        form_words =  form.words.data.split()
+        form_text = form.text.data
+        # print(form_text, '-', form_words)
+        validation = TextValidation(form_text, form_words)
+        # print(f"Matched: {validation.wordsMatched}")
+        return render_template('validation.html', form=form, match=validation.match, wordsMatched=validation.wordsMatched, words=form.words.data.split())
+
+    return render_template('validation.html', form=form, match='-', wordsMatched='-', words='')
 
 
 if __name__ == "__main__":
