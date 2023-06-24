@@ -25,6 +25,9 @@
             width: auto;
             height: auto;
         }
+        textarea {
+            margin-top:15px;
+        }
         input[type="text"]:read-only {
             background-color: #f4f4f4; 
         }
@@ -80,8 +83,8 @@
             img.alt = 'Uploaded additional Image';
 
             var div = document.getElementById(id);
-            div.appendChild(img);
-            div.appendChild(document.createElement('br'))
+            div.prepend(document.createElement('br'))
+            div.prepend(img);
         }
     </script>
 
@@ -95,7 +98,7 @@
 
                 <!-- This is a trick, when this picture is attachment number n and n>1,
                      this picture is inserted into the DOM model and we skip the whole section where a rating form is created, Cool huh? -->
-                {% if item['png_att_nr'] > 1 %}
+                {% if item['att_nr'] > 1 %}
                     <script>window.onload=addImage('/{{ item['file_content'][3:] }}', {{ item['submission_id'] }})</script>
                     {% continue %}
                 {% endif %}
@@ -130,16 +133,14 @@
                         
                         <label for="file_content" class="col-sm-2 col-form-label"></label>
 
-                        {% if item['file_content'][:3] == 'fn:' %}
-                            <div id="{{item['submission_id']}}" class="col-sm-10">
-                                <img src="/{{ item['file_content'][3:] }}" onclick="toggleFullSize(this)" alt="First Image"><br>
-                            </div>
-                        {% else %}
-                            <div id="{{item['submission_id']}}" class="col-sm-10">
+                        <div id="{{item['submission_id']}}" class="col-sm-10">
+                            {% if item['file_content'][:3] == 'fn:' %}
+                                <img src="/{{ item['file_content'][3:] }}" onclick="toggleFullSize(this)" alt="First Image">
+                            {% else %}
                                 <textarea id="file_content_{{ loop.index }}" class="form-control" rows="15">{{ item['file_content'] }}</textarea>
                                 <small class="grey">{{item['file_name']}}</small>
-                            </div>
-                        {% endif %}
+                            {% endif %}
+                        </div>
                     </div>
 
                     {% if item['words_correct'] >=0 %}

@@ -94,13 +94,20 @@ class TextValidation:
         else:
             return (False, wordsMatched)
 
+    # Case insensitive partial search and returns -1 if no match, otherwise return position just after the match in the text.
+    def findLastPos(self, text, word, pos):
+        pos = text.lower().find(word.lower(), pos)
+        if pos<0: 
+            return pos
+        return pos+len(word)
 
     def checkPositveWord(self, text, pos, word):
-        pos = text.lower().find(word.lower(), pos)
+        pos = self.findLastPos(text, word, pos)
         return pos
 
+
     def checkNegativeWord(self, text, pos, word):
-        negative_search_pos = text.lower().find(word.lower(), pos)
+        negative_search_pos = self.findLastPos(text, word, pos)
         if ( negative_search_pos > 0 ):
             return -1
         else:
@@ -109,14 +116,16 @@ class TextValidation:
     def checkOrGroup(self, text, pos, words):
         max_pos = -1
         for word in words:
-            temp_pos = text.lower().find(word.lower(), pos)
+            temp_pos = self.findLastPos(text, word, pos)
             max_pos=max(max_pos, temp_pos)
+        if max_pos<0: 
+            return pos
         return max_pos
 
     def checkAnyOrderGroup(self, text, pos, words):
         max_pos = -1
         for word in words:
-            temp_pos = text.lower().find(word.lower(), pos)
+            temp_pos = self.findLastPos(text, word, pos)
             max_pos=max(max_pos, temp_pos)
             if temp_pos < 0:
                 return temp_pos

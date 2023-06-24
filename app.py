@@ -147,10 +147,13 @@ def listUnratedAssignments(item):
         if submission.submitted_at is None or submission.workflow_state == 'graded':
             continue
 
-        png_att_nr=0
+        att_nr=0
         for attachment in submission.attachments:
 
-            if Path(attachment.filename).suffix.lower() != '.'+file_type.lower(): # does the filename extentsion mach the required one?
+            att_file_type= Path(attachment.filename).suffix.lower()[1:]
+
+            if att_file_type != file_type.lower() and att_file_type != 'png': # does the filename extentsion mach the required one?
+                print(f"Skipping {attachment.filename}")
                 continue
 
             if ( file_name_match != None and file_name_match not in attachment.filename ): # when defined, check if the filename is correct.
@@ -161,8 +164,10 @@ def listUnratedAssignments(item):
                 print(f"Failed to download file: {attachment['url']}")
                 continue
             
-            if ( file_type.lower() == 'png' ): # png, no word matching
-                
+            if ( att_file_type == 'png' ): # png, no word matching
+
+                sort_order=9
+                att_nr+=1
                 file_name = str(course_id)+'-'+str(attachment.id)+'.png'
                 file_name = loadPicture(attachment.url, file_name) # return file name with path
 
@@ -170,10 +175,11 @@ def listUnratedAssignments(item):
                 feedback=getFeedback()
                 words_correct=-99
                 rating = assignment.points_possible # png is not rated automattically, propose higest score.
-                png_att_nr+=1
 
             else: # anything but a png file, do the word matching
 
+                sort_order=1
+                att_nr+=1
                 file_content = response.content.decode()
             # words_correct, position = validateWords(words_in_order, file_content) #validate text(file_conten) with words (words must appear in text in order and !words may not exists in text)
                 validation = TextValidation(file_content, words_in_order)
@@ -193,7 +199,8 @@ def listUnratedAssignments(item):
             if submission.attempt >3:
                 rating=int(int(rating)*0.8)
 
-            list_of_dicts.append({'assignment_id':assignment_id,'assignment_name':assignment.name,
+            list_of_dicts.append({ 'sort_order':sort_order,
+            'assignment_id':assignment_id,'assignment_name':assignment.name,
             'course_id':course.id,'course_name':course.name,
             'submission_id':submission.id, 'attempt':submission.attempt,
             'rating':rating, 'points_possible':assignment.points_possible,
@@ -202,9 +209,25 @@ def listUnratedAssignments(item):
             'words_in_order':words_in_order,'words_correct':words_correct,
             'number_of_words':len(words_in_order),
             'hint':item.get('hint',''),
-            'png_att_nr':png_att_nr, 'number_of_att':len(submission.attachments)})
+            'att_nr':att_nr, 'number_of_att':len(submission.attachments)})
 
-    saveFormData(list_of_dicts)
+    # pictures need to be placed after auto-graded text
+    # in the view the picuteres will be 'inserted' using JS
+    list_of_dicts = sorted(list_of_dicts, key=lambda x: (x['user'],x['sort_order'])) 
+
+    # Becasue of the sorting the att_nr can be in the wrong sequence and in the template we need to know if we are looking
+    # at the first attachment or a asubsequent one. Becasue onoy the first is placed and all subsequent ones are inserted by JS
+    prev_submission_id = -1
+    for item in list_of_dicts:
+        if item['submission_id'] != prev_submission_id :
+            counter=1
+        else:
+            counter+=1
+        item['att_nr']=counter
+        prev_submission_id = item['submission_id']
+
+    
+    saveFormData(list_of_dicts) # save cache (mainly for developing)
 
     return(list_of_dicts)
 
@@ -284,6 +307,7 @@ def correcta(cohort, assignment_id):
     for item in data:
         if ( int(assignment_id)==int(item['assignment_id']) ):
             results=listUnratedAssignments(item)
+            # print(results)
             return render_template('rate.html', data=results, alreadySubmitted=0) # stop after first hit
 
     return
