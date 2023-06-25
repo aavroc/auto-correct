@@ -3,3 +3,4 @@ myflaskapp/__pycache__/*
 static/temp/*
 data_cache.json
 __pycache__/*
+*.pyc
