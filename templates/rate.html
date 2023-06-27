@@ -83,6 +83,23 @@
             font-size: 12px;
             color:#777777;
         }
+
+        .comments-field {
+            padding-left: 12px;
+            padding-right: 16px;
+            margin-top:16px;
+            line-height: 1.3em;
+            max-height: 12em;
+            overflow: scroll;
+            background-color: white;
+        }
+
+        .comments-field.expanded {
+            overflow: visible;
+            background-color: white;
+            max-height: 60em;
+        }
+
     </style>
     <script>
         function updateCheckboxValue(i) {
@@ -132,6 +149,13 @@
             target.prepend(link);
             target.prepend(document.createElement('br'))
             target.prepend(embed);
+        }
+        function expandTextField(element) {
+            if (element.classList.contains("expanded")) {
+                element.classList.remove("expanded");
+            } else {
+                element.classList.add('expanded');
+            }
         }
 
     </script>
@@ -254,9 +278,13 @@
 
                 <div class="form-group row">
                     <label for="feedback" class="col-sm-2 col-form-label">Feedback:</label>
-                    <div class="col-sm-10">
+                    <div class="col-sm-6">
                         <textarea id="feedback_{{ loop.index }}" name="feedback[]"
                             class="form-control">{{ item['feedback'] }}</textarea>
+                    </div>
+               
+                    <div class="col-sm-4">
+                        <div class="comments-field" onclick="expandTextField(this)">{{ item['comments'] | safe }}</div>
                     </div>
                 </div>
 

@@ -7,6 +7,7 @@ import sys, os, json, glob, random, requests
 from myflaskapp.myForms import ValidationForm
 from myflaskapp.config import config
 from myflaskapp.validation import TextValidation
+from datetime import datetime
 
 app = Flask(__name__)
 app.jinja_env.add_extension("jinja2.ext.loopcontrols")
@@ -134,6 +135,18 @@ def getFeedback():
 
     return selected_feedback
 
+def getDayMonth(date_string):
+    date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
+
+    month = date_object.strftime("%m")  # Full month name
+    day = date_object.strftime("%d")  # Zero-padded day
+
+    return day+'-'+month
+
+def getInitials(name):
+    name=name.split()
+    return name[0][:1].upper()+name[1][:1].upper()
+
 
 def listUnratedAssignments(item):
     course_id = item["course_id"]
@@ -155,15 +168,24 @@ def listUnratedAssignments(item):
         )
 
     # Get all submissions
-    submissions = assignment.get_submissions(include=["user"])
+    submissions = assignment.get_submissions(include=["user", "submission_comments"])
 
     # removeTempFiles() # ToDo remove files when rating is done!?
+
+    print(f"Checking course {course_id} assignment {assignment_id}")
 
     # Process each submission
     for i, submission in enumerate(submissions):
         # Check if the submission is already graded
-        # user=submission.user["name"]
-        # print(f"Checking {user} {submission.submitted_at} - {submission.workflow_state}")
+        user=submission.user["name"]
+        print(f"Checking {user} {submission.submitted_at} - {submission.workflow_state}")
+        comments=""
+        for comment in reversed(submission.submission_comments):
+            this_date=getDayMonth(comment['created_at'])
+            this_initials=getInitials(comment['author_name'])
+            comments += f'<i>{this_date} {this_initials}</i>: {comment["comment"]}<br>'
+            print(f"Comment {this_date} {this_initials} {comment['comment']}")
+
         if submission.submitted_at is None or submission.workflow_state == "graded":
             continue
 
@@ -244,6 +266,7 @@ def listUnratedAssignments(item):
                     "hint": item.get("hint", ""),
                     "att_nr": att_nr,
                     "number_of_att": len(submission.attachments),
+                    "comments": comments
                 }
             )
 
