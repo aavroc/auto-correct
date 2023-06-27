@@ -135,11 +135,18 @@
         }
 
     </script>
-
+    <title>
+        {% if data[0] is defined %}
+            Rate {{ data[0]['assignment_name'] }}
+        {% else %}
+            Nothing
+        {% endif %}
+    </title>
 </head>
 
 <body style='background-color:#f8f8f8'>
     <div class="container mt-5">
+        {% if data[0] is defined %}
         <form action="/submit-ratings" method="POST">
 
             {% for item in data %}
@@ -147,7 +154,7 @@
             <!-- This is a trick, when this picture/pdf is attachment number n and n>1,
                      this picture/pdf is inserted into the DOM model and we skip the whole section where a rating form is created, Cool huh? -->
             {% if item['att_nr'] > 1 %}
-                {% if item['file_type'] == 'png' %}
+                {% if item['file_type'] in ['png','jpg'] %}
                     <script>window.onload = addImage('/{{ item['file_content'][3:] }}', {{ item['submission_id'] }})</script>
                 {% endif %}
                 {% if item['file_type'] == 'pdf' %}
@@ -191,7 +198,7 @@
                     <label for="file_content" class="col-sm-2 col-form-label"></label>
 
                     <div id="{{item['submission_id']}}" class="col-sm-10">
-                        {% if item['file_type'] == 'png' %}
+                        {% if item['file_type'] in ['png', 'jpg'] %}
                             <img src="/{{ item['file_content'][3:] }}" onclick="toggleFullSize(this)" alt="Image">
                         {% elif item['file_type'] == 'pdf' %}
                             <embed src="/{{ item['file_content'][3:] }}" alt="PDF"><br>
@@ -275,6 +282,9 @@
             </div>
 
         </form>
+        {% else %}
+            <h2>Oops...nothing found to rate.</h2>
+        {% endif %}
     </div>
 </body>
 

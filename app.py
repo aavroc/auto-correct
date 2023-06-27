@@ -162,6 +162,8 @@ def listUnratedAssignments(item):
     # Process each submission
     for i, submission in enumerate(submissions):
         # Check if the submission is already graded
+        # user=submission.user["name"]
+        # print(f"Checking {user} {submission.submitted_at} - {submission.workflow_state}")
         if submission.submitted_at is None or submission.workflow_state == "graded":
             continue
 
@@ -169,7 +171,7 @@ def listUnratedAssignments(item):
         for attachment in submission.attachments:
             att_file_type = Path(attachment.filename).suffix.lower()[1:]
 
-            if (att_file_type not in ["png", "pdf"] ):
+            if (att_file_type not in ["png", "pdf", "jpg"] ):
 
                 if ( att_file_type != file_type.lower() ):  # does the filename extentsion mach the required one?
                     print(f"Skipping {attachment.filename}")
@@ -183,7 +185,7 @@ def listUnratedAssignments(item):
                 print(f"Failed to download file: {attachment['url']}")
                 continue
 
-            if att_file_type in ["png", "pdf"]:  # png, no word matching
+            if att_file_type in ["png", "pdf", "jpg"]:  # png, no word matching
                 sort_order = 9
                 att_nr += 1
                 file_name = str(course_id) + "-" + str(attachment.id) + "." + att_file_type
