@@ -16,6 +16,7 @@
 # This "command-method" returned the new position of where we are at the text. -1 one means we failed to match
 # The validation method keeps a tab on the number of matched words and returns true/flase and teh number of words matched.
 
+
 class TextValidation:
     def __init__(self, text, words):
         self.parsedCommand = self.parseWords(words)
@@ -23,72 +24,70 @@ class TextValidation:
         result = self.validate(text, self.parsedCommand)
         print(f"Result: {result}")
         (self.match, self.wordsMatched) = result
- 
-    
+
     def parseWords(self, words):
-        output=[]
-        status='normal'
+        output = []
+        status = "normal"
         for word in words:
-            if word == '':
+            if word == "":
                 continue
-            if ( word.startswith( "(" ) or word.startswith( "[" ) ):
-                status='group'
-                group=word[1:]
-            elif ( word.endswith( ")" ) ):
-                status='normal'
-                group+=' '+word[:-1]
-                output.append(['a',group])
-            elif ( word.endswith( "]" ) ):
-                status='normal'
-                group+=' '+word[:-1]
-                output.append(['o',group])
-            elif ( word[0] == '!' ):
-                output.append(['!',word[1:]])
+            if word.startswith("(") or word.startswith("["):
+                status = "group"
+                group = word[1:]
+            elif word.endswith(")"):
+                status = "normal"
+                group += " " + word[:-1]
+                output.append(["a", group])
+            elif word.endswith("]"):
+                status = "normal"
+                group += " " + word[:-1]
+                output.append(["o", group])
+            elif word[0] == "!":
+                output.append(["!", word[1:]])
             else:
-                if status == 'normal':
-                    output.append(['?',word])
-                elif status == 'group':
-                    group+=' '+word
-       
+                if status == "normal":
+                    output.append(["?", word])
+                elif status == "group":
+                    group += " " + word
+
         return output  # example output: [['?', 'word1'], ['!', 'word2'], ['?', 'word3'], ['a', 'word4 word6 word5']]
 
     def validate(self, text, words):
-
-        pos=0
-        wordsMatched=0
+        pos = 0
+        wordsMatched = 0
 
         for item in words:
             thisCommand = item[0]
             thisArgument = item[1].split()
 
-            if thisCommand == '?' : # positive word seach
-                pos = self.checkPositveWord(text,pos,thisArgument[0])
-                if pos >= 0 :
-                    wordsMatched+=1
+            if thisCommand == "?":  # positive word seach
+                pos = self.checkPositveWord(text, pos, thisArgument[0])
+                if pos >= 0:
+                    wordsMatched += 1
                 else:
                     break
 
-            if thisCommand == '!' : # negative word search
-                pos = self.checkNegativeWord(text,pos,thisArgument[0])
-                if pos >= 0 :
-                    wordsMatched+=1
+            if thisCommand == "!":  # negative word search
+                pos = self.checkNegativeWord(text, pos, thisArgument[0])
+                if pos >= 0:
+                    wordsMatched += 1
                 else:
                     break
 
-            if thisCommand == 'a' : # any order group
-                pos = self.checkAnyOrderGroup(text,pos,thisArgument)
-                if pos >= 0 :
-                    wordsMatched+=len(thisArgument)
+            if thisCommand == "a":  # any order group
+                pos = self.checkAnyOrderGroup(text, pos, thisArgument)
+                if pos >= 0:
+                    wordsMatched += len(thisArgument)
                 else:
                     break
 
-            if thisCommand == 'o' : # or group
-                pos = self.checkOrGroup(text,pos,thisArgument)
-                if pos >= 0 :
-                    wordsMatched+=len(thisArgument)
+            if thisCommand == "o":  # or group
+                pos = self.checkOrGroup(text, pos, thisArgument)
+                if pos >= 0:
+                    wordsMatched += len(thisArgument)
                 else:
                     break
-       
+
         if pos >= 0:
             return (True, wordsMatched)
         else:
@@ -97,18 +96,17 @@ class TextValidation:
     # Case insensitive partial search and returns -1 if no match, otherwise return position just after the match in the text.
     def findLastPos(self, text, word, pos):
         pos = text.lower().find(word.lower(), pos)
-        if pos<0: 
+        if pos < 0:
             return pos
-        return pos+len(word)
+        return pos + len(word)
 
     def checkPositveWord(self, text, pos, word):
         pos = self.findLastPos(text, word, pos)
         return pos
 
-
     def checkNegativeWord(self, text, pos, word):
         negative_search_pos = self.findLastPos(text, word, pos)
-        if ( negative_search_pos > 0 ):
+        if negative_search_pos > 0:
             return -1
         else:
             return pos
@@ -117,8 +115,8 @@ class TextValidation:
         max_pos = -1
         for word in words:
             temp_pos = self.findLastPos(text, word, pos)
-            max_pos=max(max_pos, temp_pos)
-        if max_pos<0: 
+            max_pos = max(max_pos, temp_pos)
+        if max_pos < 0:
             return pos
         return max_pos
 
@@ -126,7 +124,7 @@ class TextValidation:
         max_pos = -1
         for word in words:
             temp_pos = self.findLastPos(text, word, pos)
-            max_pos=max(max_pos, temp_pos)
+            max_pos = max(max_pos, temp_pos)
             if temp_pos < 0:
                 return temp_pos
 

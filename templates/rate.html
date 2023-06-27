@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <!-- Include Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
@@ -7,58 +8,80 @@
         /* Add a scrollbar to textareas */
         textarea {
             overflow-y: auto;
-            resize: both;  /* Allow the user to resize the textarea */
+            resize: both;
+            /* Allow the user to resize the textarea */
         }
-        img {
+
+        img, embed {
             width: 400px;
             transition: width 0.5s ease;
             height: auto;
-            _box-shadow: 5px 5px 10px #000, 
+            _box-shadow: 5px 5px 10px #000,
                 -5px -5px 10px #fff;
             _border: solid 1px #000;
-            margin-top:15px;
+            margin-top: 15px;
         }
+
         img:hover {
-            width:890px;
+            width: 890px;
         }
-        img.fullsize {
+
+        embed:hover {
+            width: 890px;
+            height: 690px;
+        }
+
+        img.fullsize, embed.fullsize {
             width: auto;
             height: auto;
         }
+
         textarea {
-            margin-top:15px;
+            margin-top: 15px;
         }
+
         input[type="text"]:read-only {
-            background-color: #f4f4f4; 
+            background-color: #f4f4f4;
         }
+
         .paper {
             background-image: url("{{ url_for('static', filename='img/paper.avif') }}");
             background-repeat: repeat;
-            background-size:200%;
-            box-shadow: 0px 10px 30px -5px rgba(0, 0, 0, 0.1), 
-                    0px 20px 60px -10px rgba(0, 0, 0, 0.2);
+            background-size: 200%;
+            box-shadow: 0px 10px 30px -5px rgba(0, 0, 0, 0.1),
+                0px 20px 60px -10px rgba(0, 0, 0, 0.2);
         }
+
         .marked-box {
-            background-color:#FDFCF2;
-            border:1px solid;
+            background-color: #FDFCF2;
+            border: 1px solid;
             border-color: #c0c0c0;
             padding: .375rem .75rem;
         }
+
         .read-only-box {
-            background-color:#fdfdfd;
-            border:1px solid;
+            background-color: #fdfdfd;
+            border: 1px solid;
             border-color: #c0c0c0;
             padding: .375rem .75rem;
         }
+
         .grey {
-            color:#707070;
+            color: #707070;
         }
+
         .black-link {
             color: #000000;
-            text-decoration: none; 
+            text-decoration: none;
         }
+
         .black-link:hover {
             color: #777777;
+        }
+
+        .small-link {
+            font-size: 12px;
+            color:#777777;
         }
     </style>
     <script>
@@ -79,127 +102,167 @@
             var img = document.createElement('img');
 
             img.src = src;
-            img.onclick = function() { toggleFullSize(this); };
+            img.onclick = function () { toggleFullSize(this); };
             img.alt = 'Uploaded additional Image';
 
-            var div = document.getElementById(id);
-            div.prepend(document.createElement('br'))
-            div.prepend(img);
+            var target = document.getElementById(id);
+            target.prepend(document.createElement('br'))
+            target.prepend(img);
         }
+        function addPdf(source, id) {
+            // Create new embed element
+            var embed = document.createElement('embed');
+
+            // Create new a element
+            var link = document.createElement('a');
+
+            // Set the attributes
+            embed.src = source;
+            embed.type = "application/pdf";
+            embed.style.width = "50%";
+            embed.style.height = "50%";
+
+            link.href=source;
+            link.class="small-link";
+            link.textContent="Open PDF";
+
+            // Find the target div and append the new element to it
+            var target = document.getElementById(id);
+            target.prepend(document.createElement('br'))
+            target.prepend(link);
+            target.prepend(document.createElement('br'))
+            target.prepend(embed);
+        }
+
     </script>
 
 </head>
 
 <body style='background-color:#f8f8f8'>
     <div class="container mt-5">
-        <form action="/submit-ratings" method="POST">    
+        <form action="/submit-ratings" method="POST">
 
             {% for item in data %}
 
-                <!-- This is a trick, when this picture is attachment number n and n>1,
-                     this picture is inserted into the DOM model and we skip the whole section where a rating form is created, Cool huh? -->
-                {% if item['att_nr'] > 1 %}
-                    <script>window.onload=addImage('/{{ item['file_content'][3:] }}', {{ item['submission_id'] }})</script>
-                    {% continue %}
+            <!-- This is a trick, when this picture/pdf is attachment number n and n>1,
+                     this picture/pdf is inserted into the DOM model and we skip the whole section where a rating form is created, Cool huh? -->
+            {% if item['att_nr'] > 1 %}
+                {% if item['file_type'] == 'png' %}
+                    <script>window.onload = addImage('/{{ item['file_content'][3:] }}', {{ item['submission_id'] }})</script>
                 {% endif %}
+                {% if item['file_type'] == 'pdf' %}
+                    <script>window.onload = addPdf('/{{ item['file_content'][3:] }}', {{ item['submission_id'] }})</script>
+                {% endif %}
+                {% continue %}
+            {% endif %}
 
-                <div class="card mb-4 p-3 paper">
-                    <h3 class="mb-3">#{{loop.index}} : {{ item['course_name']}} - <a href="https://talnet.instructure.com/courses/{{item['course_id']}}/assignments/{{item['assignment_id']}}" class="black-link" target=”_blank">{{item['assignment_name']}}</a></h3>
+            <div class="card mb-4 p-3 paper">
+                <h3 class="mb-3">#{{loop.index}} : {{ item['course_name']}} - <a
+                        href="https://talnet.instructure.com/courses/{{item['course_id']}}/assignments/{{item['assignment_id']}}"
+                        class="black-link" target=”_blank">{{item['assignment_name']}}</a></h3>
 
-                    <h5 class="mb-3" style="color:blue;">{{ item['user'] }}</h5>
-                
-                    <input id="aid_{{ loop.index }}" type="hidden" name="assignment_id[]" value="{{ item['assignment_id'] }}">
-                    <input id="sid_{{ loop.index }}" type="hidden" name="submission_id[]" value="{{ item['submission_id'] }}">
-                    <input id="cid_{{ loop.index }}" type="hidden" name="course_id[]" value="{{ item['course_id'] }}">
+                <h5 class="mb-3" style="color:blue;">{{ item['user'] }}</h5>
 
-                    <div class="form-group row">
-                        <div class="col-sm-12">
-                            <div class="marked-box" style="background-color:#FDFCF2;">
-                                {{ item['hint'] }}
-                            </div>
+                <input id="aid_{{ loop.index }}" type="hidden" name="assignment_id[]"
+                    value="{{ item['assignment_id'] }}">
+                <input id="sid_{{ loop.index }}" type="hidden" name="submission_id[]"
+                    value="{{ item['submission_id'] }}">
+                <input id="cid_{{ loop.index }}" type="hidden" name="course_id[]" value="{{ item['course_id'] }}">
+
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <div class="marked-box" style="background-color:#FDFCF2;">
+                            {{ item['hint'] }}
                         </div>
                     </div>
+                </div>
 
-                    <div class="form-group row">
-                        <label for="Hint" class="col-sm-2 col-form-label">Attachments:</label>
-                        <div class="col-sm-6">
-                            <div class="col-form-label grey">
-                               {{ item['number_of_att'] }}
-                            </div>
+                <div class="form-group row">
+                    <label for="Hint" class="col-sm-2 col-form-label">Attachments:</label>
+                    <div class="col-sm-6">
+                        <div class="col-form-label grey">
+                            {{ item['number_of_att'] }}
                         </div>
                     </div>
+                </div>
 
-                    <div class="form-group row">
-                        
-                        <label for="file_content" class="col-sm-2 col-form-label"></label>
+                <div class="form-group row">
 
-                        <div id="{{item['submission_id']}}" class="col-sm-10">
-                            {% if item['file_content'][:3] == 'fn:' %}
-                                <img src="/{{ item['file_content'][3:] }}" onclick="toggleFullSize(this)" alt="First Image">
-                            {% else %}
-                                <textarea id="file_content_{{ loop.index }}" class="form-control" rows="15">{{ item['file_content'] }}</textarea>
-                                <small class="grey">{{item['file_name']}}</small>
+                    <label for="file_content" class="col-sm-2 col-form-label"></label>
+
+                    <div id="{{item['submission_id']}}" class="col-sm-10">
+                        {% if item['file_type'] == 'png' %}
+                            <img src="/{{ item['file_content'][3:] }}" onclick="toggleFullSize(this)" alt="Image">
+                        {% elif item['file_type'] == 'pdf' %}
+                            <embed src="/{{ item['file_content'][3:] }}" alt="PDF"><br>
+                            <a href="/{{ item['file_content'][3:] }}" class="small-link" target="_blank">Open PDF</a>
+                        {% else %}
+                            <textarea id="file_content_{{ loop.index }}" class="form-control"
+                                rows="15">{{ item['file_content'] }}</textarea>
+                            <small class="grey">{{item['file_name']}}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if item['words_correct'] >=0 %}
+                <div class="form-group row">
+                    <label for="words_found" class="col-sm-2 col-form-label">Words found:</label>
+                    <div class="col-sm-10">
+                        <div id="words_found_{{ loop.index }}" class="form-control read-only-box">
+                            {% for word in item['words_in_order'] %}
+                                {% if loop.index <= item['words_correct'] %}
+                                        <span style="font-weight:bold;color:green;">{{word }}</span>
+                                    {% else %}
+                                        <span style="font-weight:bold;color:red;">{{ word }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="words_correct" class="col-sm-2 col-form-label">Words correct:</label>
+                    <div class="col-sm-2">
+                        <div id="words_correct__{{ loop.index }}" class="col-form-label">
+                            {{ item['words_correct'] }}
+                            {% if item['words_correct'] == item['number_of_words'] %}
+                                (all)
                             {% endif %}
                         </div>
                     </div>
-
-                    {% if item['words_correct'] >=0 %}
-                        <div class="form-group row">
-                            <label for="words_found" class="col-sm-2 col-form-label">Words found:</label>
-                            <div class="col-sm-10">
-                                <div id="words_found_{{ loop.index }}" class="form-control read-only-box">
-                                    {# {{ item['words_in_order'] | join(' ') }} #}
-                                    {% for word in item['words_in_order'] %}
-                                        {% if loop.index <= item['words_correct'] %}
-                                            <span style="font-weight:bold;color:green;">{{ word }}</span>
-                                        {% else %}
-                                            <span style="font-weight:bold;color:red;">{{ word }}</span>
-                                        {% endif %}
-                                    {% endfor %} 
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="words_correct" class="col-sm-2 col-form-label">Words correct:</label>
-                            <div class="col-sm-2">
-                                <div id="words_correct__{{ loop.index }}" class="col-form-label">
-                                    {{ item['words_correct'] }}
-                                    {% if item['words_correct'] == item['number_of_words'] %}
-                                        (all)
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                    
-                    <div class="form-group row">
-                        <label for="rating" class="col-sm-2 col-form-label">Rating:</label>
-                        <div class="col-sm-2">
-                            <input type="text" id="rating_{{ loop.index }}" name="rating[]" value="{{ item['rating'] }}" class="form-control">
-                        </div>
-                        <div class="col-sm-4">
-                            <div class="col-form-label grey">
-                                (Attempt {{item['attempt']}}, Points Possible {{item['points_possible']}})
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="feedback" class="col-sm-2 col-form-label">Feedback:</label>
-                        <div class="col-sm-10">
-                            <textarea id="feedback_{{ loop.index }}" name="feedback[]" class="form-control">{{ item['feedback'] }}</textarea>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="feedback" class="col-sm-2 col-form-label">Rate:</label>
-                        <div class="col-sm-4">
-                            &nbsp;&nbsp;<input type="checkbox" id="cb_{{ loop.index }}" name="check_box[]" onchange="updateCheckboxValue({{loop.index}})" style="transform: scale(1.5);" checked>
-                            <input type="hidden" name="checked[]" id="hidden_checkbox_{{loop.index}}" value="1">
-                        </div>
-                    </div>
-                        
                 </div>
+                {% endif %}
+
+                <div class="form-group row">
+                    <label for="rating" class="col-sm-2 col-form-label">Rating:</label>
+                    <div class="col-sm-2">
+                        <input type="text" id="rating_{{ loop.index }}" name="rating[]" value="{{ item['rating'] }}"
+                            class="form-control">
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="col-form-label grey">
+                            (Attempt {{item['attempt']}}, Points Possible {{item['points_possible']}})
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="feedback" class="col-sm-2 col-form-label">Feedback:</label>
+                    <div class="col-sm-10">
+                        <textarea id="feedback_{{ loop.index }}" name="feedback[]"
+                            class="form-control">{{ item['feedback'] }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="feedback" class="col-sm-2 col-form-label">Rate:</label>
+                    <div class="col-sm-4">
+                        &nbsp;&nbsp;<input type="checkbox" id="cb_{{ loop.index }}" name="check_box[]"
+                            onchange="updateCheckboxValue({{loop.index}})" style="transform: scale(1.5);" checked>
+                        <input type="hidden" name="checked[]" id="hidden_checkbox_{{loop.index}}" value="1">
+                    </div>
+                </div>
+
+            </div>
 
             {% endfor %}
 
@@ -214,4 +277,5 @@
         </form>
     </div>
 </body>
+
 </html>
