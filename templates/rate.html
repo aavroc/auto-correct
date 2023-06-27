@@ -8,11 +8,11 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/rate.css') }}">
     <script src="/static/js/rate.js"></script>
     <style>
-        
+
     </style>
 
     <script>
-       
+
     </script>
 
     <title>
@@ -147,10 +147,14 @@
 
                 <div class="form-group row">
                     <label for="feedback" class="col-sm-2 col-form-label">Rate:</label>
-                    <div class="col-sm-4">
+                    <div class="col-sm-1">
                         &nbsp;&nbsp;<input type="checkbox" id="cb_{{ loop.index }}" name="check_box[]"
                             onchange="updateCheckboxValue({{loop.index}})" style="transform: scale(1.5);" checked>
                         <input type="hidden" name="checked[]" id="hidden_checkbox_{{loop.index}}" value="1">
+                    </div>
+                    <div class="col-sm-4"></div>
+                    <div class="col-sm-1">
+                        <a class="button" onclick="rateViaCanvas({{loop.index}}, {{item['course_id']}}, {{item['assignment_id']}}, {{item['user_id']}})">Canvas➞</a>
                     </div>
                 </div>
 

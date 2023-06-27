@@ -260,6 +260,7 @@ def listUnratedAssignments(item):
                     "max_points": max_points,
                     "feedback": feedback,
                     "user": submission.user["name"],
+                    "user_id": submission.user["id"],
                     "file_content": file_content,
                     "file_name": attachment.filename,
                     "file_type": att_file_type,

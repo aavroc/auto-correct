@@ -1,94 +1,116 @@
-       /* Add a scrollbar to textareas */
-       textarea {
-        overflow-y: auto;
-        resize: both;
-        /* Allow the user to resize the textarea */
-    }
+/* Add a scrollbar to textareas */
+textarea {
+    overflow-y: auto;
+    resize: both;
+    /* Allow the user to resize the textarea */
+}
 
-    img, embed {
-        width: 400px;
-        transition: width 0.5s ease;
-        height: auto;
-        _box-shadow: 5px 5px 10px #000,
-            -5px -5px 10px #fff;
-        _border: solid 1px #000;
-        margin-top: 15px;
-    }
+img,
+embed {
+    width: 400px;
+    transition: width 0.5s ease;
+    height: auto;
+    _box-shadow: 5px 5px 10px #000,
+        -5px -5px 10px #fff;
+    _border: solid 1px #000;
+    margin-top: 15px;
+}
 
-    img:hover {
-        width: 890px;
-    }
+img:hover {
+    width: 890px;
+}
 
-    embed:hover {
-        width: 890px;
-        height: 690px;
-    }
+embed:hover {
+    width: 890px;
+    height: 690px;
+}
 
-    img.fullsize, embed.fullsize {
-        width: auto;
-        height: auto;
-    }
+img.fullsize,
+embed.fullsize {
+    width: auto;
+    height: auto;
+}
 
-    textarea {
-        margin-top: 15px;
-    }
+textarea {
+    margin-top: 15px;
+}
 
-    input[type="text"]:read-only {
-        background-color: #f4f4f4;
-    }
+input[type="text"]:read-only {
+    background-color: #f4f4f4;
+}
 
-    .paper {
-        background-image: url(../img/paper.avif);
-        background-repeat: repeat;
-        background-size: 200%;
-        box-shadow: 0px 10px 30px -5px rgba(0, 0, 0, 0.1),
-            0px 20px 60px -10px rgba(0, 0, 0, 0.2);
-    }
+.paper {
+    background-image: url(../img/paper.avif);
+    background-repeat: repeat;
+    background-size: 200%;
+    box-shadow: 0px 10px 30px -5px rgba(0, 0, 0, 0.1),
+        0px 20px 60px -10px rgba(0, 0, 0, 0.2);
+}
 
-    .marked-box {
-        background-color: #FDFCF2;
-        border: 1px solid;
-        border-color: #c0c0c0;
-        padding: .375rem .75rem;
-    }
+.marked-box {
+    background-color: #FDFCF2;
+    border: 1px solid;
+    border-color: #c0c0c0;
+    padding: .375rem .75rem;
+}
 
-    .read-only-box {
-        background-color: #fdfdfd;
-        border: 1px solid;
-        border-color: #c0c0c0;
-        padding: .375rem .75rem;
-    }
+.read-only-box {
+    background-color: #fdfdfd;
+    border: 1px solid;
+    border-color: #c0c0c0;
+    padding: .375rem .75rem;
+}
 
-    .grey {
-        color: #707070;
-    }
+.grey {
+    color: #707070;
+}
 
-    .black-link {
-        color: #000000;
-        text-decoration: none;
-    }
+.black-link {
+    color: #000000;
+    text-decoration: none;
+}
 
-    .black-link:hover {
-        color: #777777;
-    }
+.black-link:hover {
+    color: #777777;
+}
 
-    .small-link {
-        font-size: 12px;
-        color:#777777;
-    }
+.small-link {
+    font-size: 12px;
+    color: #777777;
+}
 
-    .comments-field {
-        padding-left: 12px;
-        padding-right: 16px;
-        margin-top:16px;
-        line-height: 1.3em;
-        max-height: 12em;
-        overflow: scroll;
-        background-color: white;
-    }
+.comments-field {
+    padding-left: 12px;
+    padding-right: 16px;
+    margin-top: 16px;
+    line-height: 1.3em;
+    max-height: 12em;
+    overflow: scroll;
+    background-color: white;
+}
 
-    .comments-field.expanded {
-        overflow: visible;
-        background-color: white;
-        max-height: 60em;
-    }
+.comments-field.expanded {
+    overflow: visible;
+    background-color: white;
+    max-height: 60em;
+}
+
+.button {
+    display: inline-block;
+    padding: 1px 2px;
+    font-size: 0.7em;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    background-color: rgba(0, 123, 255, 0.6);
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.1s ease;
+    cursor: pointer;
+}
+
+.button:hover,
+.regular-link:hover {
+    background-color: #ffdd00;
+    color: #000000;
+}

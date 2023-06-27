@@ -9,6 +9,13 @@ function updateCheckboxValue(i) {
     }
 }
 
+function uncheckCheckBox(i) {
+    var visibleCheckbox = document.getElementById("cb_" + i);
+    var hiddenCheckboxValue = document.getElementById("hidden_checkbox_" + i);
+    visibleCheckbox.checked = false;
+    hiddenCheckboxValue.value = 0;
+}
+
 function toggleFullSize(img) {
     img.classList.toggle('fullsize');
 }
@@ -76,4 +83,11 @@ function focusInputField(target, points_possible) {
             target.select();
         }, 1200);
     }
+}
+
+function rateViaCanvas(itemNr, course, assignment, user) {
+    uncheckCheckBox(itemNr);
+    url = "https://talnet.instructure.com/courses/"+course+"/gradebook/speed_grader?assignment_id="+assignment+"&student_id="+user;
+    console.log(url);
+    window.open(url, '_blank');
 }
