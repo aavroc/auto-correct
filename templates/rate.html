@@ -4,161 +4,17 @@
 <head>
     <!-- Include Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/rate.css') }}">
+    <script src="/static/js/rate.js"></script>
     <style>
-        /* Add a scrollbar to textareas */
-        textarea {
-            overflow-y: auto;
-            resize: both;
-            /* Allow the user to resize the textarea */
-        }
-
-        img, embed {
-            width: 400px;
-            transition: width 0.5s ease;
-            height: auto;
-            _box-shadow: 5px 5px 10px #000,
-                -5px -5px 10px #fff;
-            _border: solid 1px #000;
-            margin-top: 15px;
-        }
-
-        img:hover {
-            width: 890px;
-        }
-
-        embed:hover {
-            width: 890px;
-            height: 690px;
-        }
-
-        img.fullsize, embed.fullsize {
-            width: auto;
-            height: auto;
-        }
-
-        textarea {
-            margin-top: 15px;
-        }
-
-        input[type="text"]:read-only {
-            background-color: #f4f4f4;
-        }
-
-        .paper {
-            background-image: url("{{ url_for('static', filename='img/paper.avif') }}");
-            background-repeat: repeat;
-            background-size: 200%;
-            box-shadow: 0px 10px 30px -5px rgba(0, 0, 0, 0.1),
-                0px 20px 60px -10px rgba(0, 0, 0, 0.2);
-        }
-
-        .marked-box {
-            background-color: #FDFCF2;
-            border: 1px solid;
-            border-color: #c0c0c0;
-            padding: .375rem .75rem;
-        }
-
-        .read-only-box {
-            background-color: #fdfdfd;
-            border: 1px solid;
-            border-color: #c0c0c0;
-            padding: .375rem .75rem;
-        }
-
-        .grey {
-            color: #707070;
-        }
-
-        .black-link {
-            color: #000000;
-            text-decoration: none;
-        }
-
-        .black-link:hover {
-            color: #777777;
-        }
-
-        .small-link {
-            font-size: 12px;
-            color:#777777;
-        }
-
-        .comments-field {
-            padding-left: 12px;
-            padding-right: 16px;
-            margin-top:16px;
-            line-height: 1.3em;
-            max-height: 12em;
-            overflow: scroll;
-            background-color: white;
-        }
-
-        .comments-field.expanded {
-            overflow: visible;
-            background-color: white;
-            max-height: 60em;
-        }
-
+        
     </style>
+
     <script>
-        function updateCheckboxValue(i) {
-            var visibleCheckbox = document.getElementById("cb_" + i);
-            var hiddenCheckboxValue = document.getElementById("hidden_checkbox_" + i);
-
-            if (visibleCheckbox.checked) {
-                hiddenCheckboxValue.value = "1";
-            } else {
-                hiddenCheckboxValue.value = "0";
-            }
-        }
-        function toggleFullSize(img) {
-            img.classList.toggle('fullsize');
-        }
-        function addImage(src, id) {
-            var img = document.createElement('img');
-
-            img.src = src;
-            img.onclick = function () { toggleFullSize(this); };
-            img.alt = 'Uploaded additional Image';
-
-            var target = document.getElementById(id);
-            target.prepend(document.createElement('br'))
-            target.prepend(img);
-        }
-        function addPdf(source, id) {
-            // Create new embed element
-            var embed = document.createElement('embed');
-
-            // Create new a element
-            var link = document.createElement('a');
-
-            // Set the attributes
-            embed.src = source;
-            embed.type = "application/pdf";
-            embed.style.width = "50%";
-            embed.style.height = "50%";
-
-            link.href=source;
-            link.class="small-link";
-            link.textContent="Open PDF";
-
-            // Find the target div and append the new element to it
-            var target = document.getElementById(id);
-            target.prepend(document.createElement('br'))
-            target.prepend(link);
-            target.prepend(document.createElement('br'))
-            target.prepend(embed);
-        }
-        function expandTextField(element) {
-            if (element.classList.contains("expanded")) {
-                element.classList.remove("expanded");
-            } else {
-                element.classList.add('expanded');
-            }
-        }
-
+       
     </script>
+
     <title>
         {% if data[0] is defined %}
             Rate {{ data[0]['assignment_name'] }}
@@ -265,13 +121,13 @@
 
                 <div class="form-group row">
                     <label for="rating" class="col-sm-2 col-form-label">Rating:</label>
-                    <div class="col-sm-2">
+                    <div class="col-sm-1">
                         <input type="text" id="rating_{{ loop.index }}" name="rating[]" value="{{ item['rating'] }}"
                             class="form-control">
                     </div>
                     <div class="col-sm-4">
                         <div class="col-form-label grey">
-                            (Attempt {{item['attempt']}}, Points Possible {{item['points_possible']}})
+                            (Attempt {{item['attempt']}}, Max points {{item['max_points']}}/{{item['points_possible']}})
                         </div>
                     </div>
                 </div>
@@ -280,7 +136,8 @@
                     <label for="feedback" class="col-sm-2 col-form-label">Feedback:</label>
                     <div class="col-sm-6">
                         <textarea id="feedback_{{ loop.index }}" name="feedback[]"
-                            class="form-control">{{ item['feedback'] }}</textarea>
+                            onblur="focusInputField( rating_{{ loop.index }}, {{item['points_possible']}} )"
+                            class="form-control" rows="5">{{ item['feedback'] }}</textarea>
                     </div>
                
                     <div class="col-sm-4">

@@ -179,15 +179,15 @@ def listUnratedAssignments(item):
         # Check if the submission is already graded
         user=submission.user["name"]
         print(f"Checking {user} {submission.submitted_at} - {submission.workflow_state}")
+
+        if submission.submitted_at is None or submission.workflow_state == "graded":
+            continue
+
         comments=""
         for comment in reversed(submission.submission_comments):
             this_date=getDayMonth(comment['created_at'])
             this_initials=getInitials(comment['author_name'])
-            comments += f'<i>{this_date} {this_initials}</i>: {comment["comment"]}<br>'
-            print(f"Comment {this_date} {this_initials} {comment['comment']}")
-
-        if submission.submitted_at is None or submission.workflow_state == "graded":
-            continue
+            comments += f'<i>{this_date} {this_initials}</i>: {comment["comment"]}<br><br>'
 
         att_nr = 0
         for attachment in submission.attachments:
@@ -241,8 +241,10 @@ def listUnratedAssignments(item):
 
             # When more than 3 attempts max score is 80% of points_possible (max score)
 
+            max_points = assignment.points_possible
             if submission.attempt > 3:
                 rating = int(int(rating) * 0.8)
+                max_points = int(int(max_points) * 0.8)
 
             list_of_dicts.append(
                 {
@@ -254,7 +256,8 @@ def listUnratedAssignments(item):
                     "submission_id": submission.id,
                     "attempt": submission.attempt,
                     "rating": rating,
-                    "points_possible": assignment.points_possible,
+                    "points_possible": int(assignment.points_possible),
+                    "max_points": max_points,
                     "feedback": feedback,
                     "user": submission.user["name"],
                     "file_content": file_content,
