@@ -81,7 +81,7 @@
                         {% if item['file_type'] in ['png', 'jpg'] %}
                             <img src="/{{ item['file_content'][3:] }}" onclick="toggleFullSize(this)" alt="Image">
                         {% elif item['file_type'] == 'pdf' %}
-                            <embed src="/{{ item['file_content'][3:] }}" alt="PDF"><br>
+                            <iframe src="/{{ item['file_content'][3:] }}" alt="PDF"><br>
                             <a href="/{{ item['file_content'][3:] }}" class="small-link" target="_blank">Open PDF</a>
                         {% else %}
                             <textarea id="file_content_{{ loop.index }}" class="form-control"

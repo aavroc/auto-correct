@@ -6,7 +6,7 @@ textarea {
 }
 
 img,
-embed {
+iframe {
     width: 400px;
     transition: width 0.5s ease;
     height: auto;
@@ -14,19 +14,20 @@ embed {
         -5px -5px 10px #fff;
     _border: solid 1px #000;
     margin-top: 15px;
+    position: static;
 }
 
 img:hover {
     width: 890px;
 }
 
-embed:hover {
+iframe:hover {
     width: 890px;
     height: 690px;
 }
 
 img.fullsize,
-embed.fullsize {
+iframe.fullsize {
     width: auto;
     height: auto;
 }

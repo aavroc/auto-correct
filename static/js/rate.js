@@ -34,16 +34,15 @@ function addImage(src, id) {
 
 function addPdf(source, id) {
     // Create new embed element
-    var embed = document.createElement('embed');
+    var iframe = document.createElement('iframe');
 
     // Create new a element
     var link = document.createElement('a');
 
     // Set the attributes
-    embed.src = source;
-    embed.type = "application/pdf";
-    embed.style.width = "50%";
-    embed.style.height = "50%";
+    iframe.src = source;
+    iframe.type = "application/pdf";
+
 
     link.href=source;
     link.class="small-link";
@@ -54,7 +53,7 @@ function addPdf(source, id) {
     target.prepend(document.createElement('br'))
     target.prepend(link);
     target.prepend(document.createElement('br'))
-    target.prepend(embed);
+    target.prepend(iframe);
 }
 
 function expandTextField(element) {

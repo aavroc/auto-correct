@@ -20,9 +20,9 @@
 class TextValidation:
     def __init__(self, text, words):
         self.parsedCommand = self.parseWords(words)
-        print(f"Result: {self.parsedCommand}")
+        print(f"Parsed result: {self.parsedCommand}")
         result = self.validate(text, self.parsedCommand)
-        print(f"Result: {result}")
+        print(f"Validated result: {result}")
         (self.match, self.wordsMatched) = result
 
     def parseWords(self, words):

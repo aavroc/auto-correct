@@ -177,8 +177,8 @@ def listUnratedAssignments(item):
     # Process each submission
     for i, submission in enumerate(submissions):
         # Check if the submission is already graded
-        user=submission.user["name"]
-        print(f"Checking {user} {submission.submitted_at} - {submission.workflow_state}")
+        # user=submission.user["name"]
+        # print(f"Checking {user} {submission.submitted_at} - {submission.workflow_state}")
 
         if submission.submitted_at is None or submission.workflow_state == "graded":
             continue
