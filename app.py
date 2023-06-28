@@ -129,9 +129,12 @@ def getFormdataFiles():
     return file_data
 
 
-def getFeedback():
+def getFeedback(positief):
     # ToDo check if config exists and if it is a list.
-    selected_feedback = random.choice(config["default_feedback"])
+    if positief:
+        selected_feedback = random.choice(config["default_feedback_pos"])
+    else:
+        selected_feedback = random.choice(config["default_feedback_neg"])
 
     return selected_feedback
 
@@ -216,7 +219,7 @@ def listUnratedAssignments(item):
                 file_content = (
                     "fn:" + file_name
                 )  # file content refers to a filename fn: <filename> which is the file name to the picture downloaded
-                feedback = getFeedback()
+                feedback = getFeedback(True)
                 words_correct = -99
                 rating = (
                     assignment.points_possible
@@ -234,10 +237,10 @@ def listUnratedAssignments(item):
                 # if (position > 1): # position of last found word and will be -1 when a word is not found.
                 if match:
                     rating = assignment.points_possible
-                    feedback = getFeedback()
+                    feedback = getFeedback(True)
                 else:
                     rating = 0
-                    feedback = "Niet helemaal goed"
+                    feedback = getFeedback(False)
 
             # When more than 3 attempts max score is 80% of points_possible (max score)
 
@@ -259,6 +262,7 @@ def listUnratedAssignments(item):
                     "points_possible": int(assignment.points_possible),
                     "max_points": max_points,
                     "feedback": feedback,
+                    "alt_feedback": getFeedback(True),
                     "user": submission.user["name"],
                     "user_id": submission.user["id"],
                     "file_content": file_content,

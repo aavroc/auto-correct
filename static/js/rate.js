@@ -90,3 +90,20 @@ function rateViaCanvas(itemNr, course, assignment, user) {
     console.log(url);
     window.open(url, '_blank');
 }
+
+function setFeedbackAndRating(itemNr, alt_feedback, maxRating) {
+    console.log('alt_feedback: '+alt_feedback);
+    var feedbackId = 'feedback_' + itemNr;
+    var ratingId = 'rating_' + itemNr;
+  
+    var feedbackTextarea = document.getElementById(feedbackId);
+    if (feedbackTextarea) {
+      feedbackTextarea.value = alt_feedback;
+    }
+  
+    var ratingInput = document.getElementById(ratingId);
+    if (ratingInput) {
+      ratingInput.value = maxRating;
+    }
+  }
+  

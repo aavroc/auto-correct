@@ -152,7 +152,13 @@
                             onchange="updateCheckboxValue({{loop.index}})" style="transform: scale(1.5);" checked>
                         <input type="hidden" name="checked[]" id="hidden_checkbox_{{loop.index}}" value="1">
                     </div>
-                    <div class="col-sm-4"></div>
+                    <div class="col-sm-3"></div>
+                    <div class="col-sm-1">
+                        {% if item['rating'] != item['points_possible'] %}
+                            <a class="button rate" onclick="setFeedbackAndRating('{{ loop.index }}', '{{ item['alt_feedback'] }}',
+                                                    '{{ item['points_possible'] }}')">Correct</a>
+                        {% endif %}
+                    </div>
                     <div class="col-sm-1">
                         <a class="button" onclick="rateViaCanvas({{loop.index}}, {{item['course_id']}}, {{item['assignment_id']}}, {{item['user_id']}})">Canvas➞</a>
                     </div>

@@ -98,7 +98,8 @@ input[type="text"]:read-only {
 
 .button {
     display: inline-block;
-    padding: 1px 2px;
+    min-width: 60px;
+    padding: 2px 3px;
     font-size: 0.7em;
     text-align: center;
     text-decoration: none;
@@ -108,6 +109,10 @@ input[type="text"]:read-only {
     border-radius: 4px;
     transition: background-color 0.1s ease;
     cursor: pointer;
+}
+
+.button.rate {
+    background-color:#FE8B67;
 }
 
 .button:hover,
