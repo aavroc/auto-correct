@@ -35,10 +35,10 @@
                      this picture/pdf is inserted into the DOM model and we skip the whole section where a rating form is created, Cool huh? -->
             {% if item['att_nr'] > 1 %}
                 {% if item['file_type'] in ['png','jpg'] %}
-                    <script>window.onload = addImage('/{{ item['file_content'][3:] }}', {{ item['submission_id'] }})</script>
+                    <script>window.onload = addImage('/{{ item.file_content[3:] }}', '{{ item.submission_id }}')</script>
                 {% endif %}
                 {% if item['file_type'] == 'pdf' %}
-                    <script>window.onload = addPdf('/{{ item['file_content'][3:] }}', {{ item['submission_id'] }})</script>
+                    <script>window.onload = addPdf('/{{ item.file_content[3:] }}', '{{ item.submission_id }}')</script>
                 {% endif %}
                 {% continue %}
             {% endif %}
@@ -127,6 +127,11 @@
                     </div>
                     <div class="col-sm-4">
                         <div class="col-form-label grey">
+                            {% if item['rating'] != item['points_possible'] %}
+                                        <a class="button rate" id="button_rate_{{ loop.index }}"
+                                                onclick="setFeedbackAndRating('{{ loop.index }}',
+                                                '{{ item.alt_feedback }}', '{{ item.points_possible }}')">Correct</a>
+                            {% endif %}
                             (Attempt {{item['attempt']}}, Max points {{item['max_points']}}/{{item['points_possible']}})
                         </div>
                     </div>
@@ -136,7 +141,7 @@
                     <label for="feedback" class="col-sm-2 col-form-label">Feedback:</label>
                     <div class="col-sm-6">
                         <textarea id="feedback_{{ loop.index }}" name="feedback[]"
-                            onblur="focusInputField( rating_{{ loop.index }}, {{item['points_possible']}} )"
+                            onblur="focusInputField( rating_{{ loop.index }}, {{ item.points_possible }} )"
                             class="form-control" rows="5">{{ item['feedback'] }}</textarea>
                     </div>
                
@@ -149,18 +154,12 @@
                     <label for="feedback" class="col-sm-2 col-form-label">Rate:</label>
                     <div class="col-sm-1">
                         &nbsp;&nbsp;<input type="checkbox" id="cb_{{ loop.index }}" name="check_box[]"
-                            onchange="updateCheckboxValue({{loop.index}})" style="transform: scale(1.5);" checked>
+                            onchange="updateCheckboxValue('{{ loop.index }}')" style="transform: scale(1.5);" checked>
                         <input type="hidden" name="checked[]" id="hidden_checkbox_{{loop.index}}" value="1">
                     </div>
-                    <div class="col-sm-3"></div>
+                    <div class="col-sm-4"></div>
                     <div class="col-sm-1">
-                        {% if item['rating'] != item['points_possible'] %}
-                            <a class="button rate" onclick="setFeedbackAndRating('{{ loop.index }}', '{{ item['alt_feedback'] }}',
-                                                    '{{ item['points_possible'] }}')">Correct</a>
-                        {% endif %}
-                    </div>
-                    <div class="col-sm-1">
-                        <a class="button" onclick="rateViaCanvas({{loop.index}}, {{item['course_id']}}, {{item['assignment_id']}}, {{item['user_id']}})">Canvas➞</a>
+                        <a class="button" onclick="rateViaCanvas('{{ loop.index }}', '{{ item.course_id }}', '{{item.assignment_id }}', '{{ item.user_id }}')">Canvas➞</a>
                     </div>
                 </div>
 

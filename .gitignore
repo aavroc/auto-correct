@@ -1,7 +1,6 @@
 myflaskapp/config.py
 myflaskapp/__pycache__/*
-static/temp/*
+static/temp
 data_cache.json
 *.pyc
-__pycache__/*.pyc
-__pycache__/*.*
+__pycache__

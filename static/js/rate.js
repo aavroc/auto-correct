@@ -44,9 +44,9 @@ function addPdf(source, id) {
     iframe.type = "application/pdf";
 
 
-    link.href=source;
-    link.class="small-link";
-    link.textContent="Open PDF";
+    link.href = source;
+    link.class = "small-link";
+    link.textContent = "Open PDF";
 
     // Find the target div and append the new element to it
     var target = document.getElementById(id);
@@ -66,16 +66,16 @@ function expandTextField(element) {
 
 function focusInputField(target, points_possible) {
     var oldValue = parseFloat(target.value);
-    var newValue = Math.floor(points_possible*0.25);
+    var newValue = Math.floor(points_possible * 0.25);
 
     if (!isNaN(oldValue)) {
         target.value = newValue;
 
-        var flickeringInterval = setInterval(function() {
+        var flickeringInterval = setInterval(function () {
             target.value = (target.value === "") ? newValue : "";
         }, 100);
-      
-        setTimeout(function() {
+
+        setTimeout(function () {
             clearInterval(flickeringInterval);
             target.value = newValue;
             target.focus();
@@ -86,24 +86,27 @@ function focusInputField(target, points_possible) {
 
 function rateViaCanvas(itemNr, course, assignment, user) {
     uncheckCheckBox(itemNr);
-    url = "https://talnet.instructure.com/courses/"+course+"/gradebook/speed_grader?assignment_id="+assignment+"&student_id="+user;
+    url = "https://talnet.instructure.com/courses/" + course + "/gradebook/speed_grader?assignment_id=" + assignment + "&student_id=" + user;
     console.log(url);
     window.open(url, '_blank');
 }
 
 function setFeedbackAndRating(itemNr, alt_feedback, maxRating) {
-    console.log('alt_feedback: '+alt_feedback);
+    console.log('alt_feedback: ' + alt_feedback);
     var feedbackId = 'feedback_' + itemNr;
     var ratingId = 'rating_' + itemNr;
-  
+    var buttonId = 'button_rate_' + itemNr;
+
+    var button = document.getElementById(buttonId);
+    button.style.display = 'none';
+
     var feedbackTextarea = document.getElementById(feedbackId);
     if (feedbackTextarea) {
-      feedbackTextarea.value = alt_feedback;
+        feedbackTextarea.value = alt_feedback;
     }
-  
+
     var ratingInput = document.getElementById(ratingId);
     if (ratingInput) {
-      ratingInput.value = maxRating;
+        ratingInput.value = maxRating;
     }
-  }
-  
+}

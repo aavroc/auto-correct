@@ -98,7 +98,8 @@ input[type="text"]:read-only {
 
 .button {
     display: inline-block;
-    min-width: 60px;
+    margin-right: 20px;
+    min-width: 50px;
     padding: 2px 3px;
     font-size: 0.7em;
     text-align: center;
