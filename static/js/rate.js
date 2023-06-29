@@ -20,7 +20,7 @@ function toggleFullSize(img) {
     img.classList.toggle('fullsize');
 }
 
-function addImage(src, id) {
+function addImage(src, id, text) {
     var img = document.createElement('img');
 
     img.src = src;
@@ -28,8 +28,17 @@ function addImage(src, id) {
     img.alt = 'Uploaded additional Image';
 
     var target = document.getElementById(id);
-    target.prepend(document.createElement('br'))
+
+    var span = document.createElement('span');
+    span.className = 'small-grey';
+    var fileName = document.createTextNode(text);
+    span.appendChild(fileName);
+
+    target.prepend(document.createElement('br'));
+    target.prepend(span);
+    target.prepend(document.createElement('br'));
     target.prepend(img);
+    
 }
 
 function addPdf(source, id) {
@@ -64,7 +73,8 @@ function expandTextField(element) {
     }
 }
 
-function focusInputField(target, points_possible) {
+function focusInputField(targetId, points_possible) {
+    var target = document.getElementById(targetId);
     var oldValue = parseFloat(target.value);
     var newValue = Math.floor(points_possible * 0.25);
 

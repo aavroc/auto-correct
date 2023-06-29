@@ -18,9 +18,11 @@ API_URL = config["API_URL"]
 # Canvas API key
 API_KEY = config["API_KEY"]
 
-file_path_form_data = (
-    "static/temp/formdata.json"  # Global variable for the cached form data
-)
+FILE_FORM_DATA = "static/temp/formdata.json"  # Global variable for the cached form data
+
+TEST = config.get("TEST")
+print(f"tesing: {TEST}")
+
 
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, API_KEY)
@@ -72,26 +74,26 @@ def _validateWords(words, text):
 
 
 def saveFormData(data):
-    if os.path.isfile(file_path_form_data):
+    if os.path.isfile(FILE_FORM_DATA):
         # Rename the existing file with a sequence number
         sequence_number = 1
-        name, extension = os.path.splitext(file_path_form_data)
+        name, extension = os.path.splitext(FILE_FORM_DATA)
         while True:
             new_file_path = f"{name}-{sequence_number}{extension}"
             if not os.path.isfile(new_file_path):
-                os.rename(file_path_form_data, new_file_path)
+                os.rename(FILE_FORM_DATA, new_file_path)
                 break
             sequence_number += 1
 
-    with open(file_path_form_data, "w") as file:
+    with open(FILE_FORM_DATA, "w") as file:
         json.dump(data, file)
 
 
 def loadFormData(file_name=""):
     if file_name == "":
-        file_name = file_path_form_data
+        file_name = FILE_FORM_DATA
     else:
-        directory = os.path.dirname(file_path_form_data)
+        directory = os.path.dirname(FILE_FORM_DATA)
         file_name = os.path.join(directory, file_name)
 
     if not os.path.isfile(file_name):  # Check if file exists
@@ -103,7 +105,7 @@ def loadFormData(file_name=""):
 
 def getFormdataFiles():
     directory = os.path.dirname(
-        file_path_form_data
+        FILE_FORM_DATA
     )  # Replace with the actual directory path
 
     # Get all files in the directory
@@ -124,7 +126,7 @@ def getFormdataFiles():
         file_data.append({"name": file, "creation_date": creation_date})
 
     # Sort files by creation date
-    file_data.sort(key=lambda x: x["creation_date"])
+    file_data.sort(key=lambda x: x["creation_date"], reverse=True)
 
     return file_data
 
@@ -138,17 +140,19 @@ def getFeedback(positief):
 
     return selected_feedback
 
+
 def getDayMonth(date_string):
     date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
 
     month = date_object.strftime("%m")  # Full month name
     day = date_object.strftime("%d")  # Zero-padded day
 
-    return day+'-'+month
+    return day + "-" + month
+
 
 def getInitials(name):
-    name=name.split()
-    return name[0][:1].upper()+name[1][:1].upper()
+    name = name.split()
+    return name[0][:1].upper() + name[1][:1].upper()
 
 
 def listUnratedAssignments(item):
@@ -179,30 +183,40 @@ def listUnratedAssignments(item):
 
     # Process each submission
     for i, submission in enumerate(submissions):
-        # Check if the submission is already graded
-        # user=submission.user["name"]
-        # print(f"Checking {user} {submission.submitted_at} - {submission.workflow_state}")
+        if TEST:
+            user = submission.user["name"]
+            print(f"Checking {user} {submission.submitted_at} - {submission.workflow_state}")
 
-        if submission.submitted_at is None or submission.workflow_state == "graded":
+        if submission.submitted_at is None:
             continue
+        if not TEST and submission.workflow_state == "graded":
+            continue
+        if TEST and i > 10:
+            break
 
-        comments=""
+        comments = ""
         for comment in reversed(submission.submission_comments):
-            this_date=getDayMonth(comment['created_at'])
-            this_initials=getInitials(comment['author_name'])
-            comments += f'<i>{this_date} {this_initials}</i>: {comment["comment"]}<br><br>'
+            this_date = getDayMonth(comment["created_at"])
+            this_initials = getInitials(comment["author_name"])
+            comments += (
+                f'<i>{this_date} {this_initials}</i>: {comment["comment"]}<br><br>'
+            )
 
         att_nr = 0
         for attachment in submission.attachments:
             att_file_type = Path(attachment.filename).suffix.lower()[1:]
 
-            if (att_file_type not in ["png", "pdf", "jpg"] ):
-
-                if ( att_file_type != file_type.lower() ):  # does the filename extentsion mach the required one?
+            if att_file_type not in ["png", "pdf", "jpg"]:
+                if (
+                    att_file_type != file_type.lower()
+                ):  # does the filename extentsion mach the required one?
                     print(f"Skipping {attachment.filename}")
                     continue
 
-                if ( file_name_match != None and file_name_match not in attachment.filename ):  # when defined, check if the filename is correct.
+                if (
+                    file_name_match != None
+                    and file_name_match not in attachment.filename
+                ):  # when defined, check if the filename is correct.
                     continue
 
             response = requests.get(attachment.url, allow_redirects=True)
@@ -213,8 +227,12 @@ def listUnratedAssignments(item):
             if att_file_type in ["png", "pdf", "jpg"]:  # png, no word matching
                 sort_order = 9
                 att_nr += 1
-                file_name = str(course_id) + "-" + str(attachment.id) + "." + att_file_type
-                file_name = loadPicture( attachment.url, file_name )  # return file name with path
+                file_name = (
+                    str(course_id) + "-" + str(attachment.id) + "." + att_file_type
+                )
+                file_name = loadPicture(
+                    attachment.url, file_name
+                )  # return file name with path
 
                 file_content = (
                     "fn:" + file_name
@@ -274,7 +292,8 @@ def listUnratedAssignments(item):
                     "hint": item.get("hint", ""),
                     "att_nr": att_nr,
                     "number_of_att": len(submission.attachments),
-                    "comments": comments
+                    "comments": comments,
+                    "test": TEST
                 }
             )
 
@@ -327,9 +346,9 @@ def update_grade_and_feedback(posted_variables):
             if int(submission.id) == int(submission_id) and int(check_values[i]) == 1:
                 count += 1
                 output += f"\nRating {submission_id} for {submission.user['name']} with rate {rating_values[i]} and feedback {feedback_values[i]}\n"
-                # next two lines do the actual rating and feedback submision
-                submission.edit(submission={"posted_grade": str(rating_values[i])})
-                submission.edit(comment={"text_comment": feedback_values[i]})
+                if not TEST:  # next two lines do the actual rating and feedback submision
+                    submission.edit(submission={"posted_grade": str(rating_values[i])})
+                    submission.edit(comment={"text_comment": feedback_values[i]})
 
     output += f"\n\nRated {count} assignments succesfully."
     return output
