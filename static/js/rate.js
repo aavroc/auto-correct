@@ -120,3 +120,28 @@ function setFeedbackAndRating(itemNr, alt_feedback, maxRating) {
         ratingInput.value = maxRating;
     }
 }
+
+function decreaseValue(inputField, maxValue) {
+    var currentValue = parseInt(inputField.value, 10);
+    
+    if (currentValue === 0) {
+        inputField.value = maxValue;
+    } else {
+        if ( currentValue > 15 ) {
+            inputField.value = currentValue - 2;
+        } else {
+            inputField.value = currentValue - 1;
+        }
+    }
+}
+
+function updateRatingField(itemNr, selectedValue) {
+    var feedbackId = 'feedback_' + itemNr;
+    var feedback = document.getElementById(feedbackId);
+
+    var ratingId = 'rating_' + itemNr;
+    var rating = document.getElementById(ratingId);
+
+    feedback.value = selectedValue;
+    rating.value = 0;
+}

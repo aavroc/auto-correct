@@ -23,6 +23,7 @@ FILE_FORM_DATA = "static/temp/formdata.json"  # Global variable for the cached f
 TEST = config.get("TEST")
 print(f"tesing: {TEST}")
 
+print(f"tesing: {config['defaults']}")
 
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, API_KEY)
@@ -191,7 +192,7 @@ def listUnratedAssignments(item):
             continue
         if not TEST and submission.workflow_state == "graded":
             continue
-        if TEST and i > 10:
+        if TEST and i > 6:
             break
 
         comments = ""
@@ -358,7 +359,7 @@ def update_grade_and_feedback(posted_variables):
 def index():
     results = loadFormData()
     if results:
-        return render_template("rate.html", data=results, alreadySubmitted=1)
+        return render_template("rate.html", data=results, defaults=config['defaults'], alreadySubmitted=1 )
 
     return render_template("results.html", data="No Data in form cache")
 
@@ -367,7 +368,7 @@ def index():
 def indexParameter(file_name):
     results = loadFormData(file_name)
     if results:
-        return render_template("rate.html", data=results)
+        return render_template("rate.html",  data=results, defaults=config['defaults'], alreadySubmitted=1 )
 
     return render_template("results.html", data="File empty or deleted")
 
@@ -396,8 +397,7 @@ def correcta(cohort, assignment_id):
             results = listUnratedAssignments(item)
             # print(results)
             return render_template(
-                "rate.html", data=results, alreadySubmitted=0
-            )  # stop after first hit
+                "rate.html", data=results, defaults=config['defaults'], alreadySubmitted=0)  # stop after first hit
 
     return
 

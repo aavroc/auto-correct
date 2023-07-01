@@ -4,7 +4,6 @@
 <head>
     <!-- Include Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/rate.css') }}">
     <script src="/static/js/rate.js"></script>
     <style>
@@ -24,7 +23,7 @@
     </title>
 </head>
 
-<body style='background-color:#f8f8f8'>
+<body>
     <div class="container mt-5">
         {% if data[0] is defined %}
         <form action="/submit-ratings" method="POST">
@@ -123,9 +122,9 @@
                     <label for="rating" class="col-sm-2 col-form-label">Rating:</label>
                     <div class="col-sm-1">
                         <input type="text" id="rating_{{ loop.index }}" name="rating[]" value="{{ item['rating'] }}"
-                            class="form-control">
+                            class="form-control" onclick="decreaseValue(this, '{{item.points_possible}}')">
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-6">
                         <div class="col-form-label grey">
                             {% if item['rating'] != item['points_possible'] %}
                                         <a class="button rate" id="button_rate_{{ loop.index }}"
@@ -138,13 +137,19 @@
                 </div>
 
                 <div class="form-group row">
-                    <label for="feedback" class="col-sm-2 col-form-label">Feedback:</label>
+                    <label for="feedback" class="col-sm-2 col-form-label">Feedback:
+                        <select id="comments_{{loop.index}}" class="defaults" onchange="updateRatingField( '{{ loop.index }}', this.value)">
+                            <option value="">Select...</option>
+                            {% for option in defaults %}
+                                <option value="{{ option.value }}">{{ option.short }}</option>
+                            {% endfor %}
+                        </select>&nbsp;&#x2192;
+                    </label>
                     <div class="col-sm-6">
                         <textarea id="feedback_{{ loop.index }}" name="feedback[]"
                             onblur="focusInputField( 'rating_' + '{{ loop.index }}', '{{ item.points_possible }}' )"
                             class="form-control" rows="5">{{ item['feedback'] }}</textarea>
                     </div>
-               
                     <div class="col-sm-4">
                         <div class="comments-field" onclick="expandTextField(this)">{{ item['comments'] | safe }}</div>
                     </div>

@@ -1,7 +1,31 @@
 config = {
-    "API_URL": "https://edu.server.com", #  Canvas server URL
-    "API_KEY": "12345....your-api-key", #  Canvas API key
-    "default_feedback_pos": ["Top gedaan!", "Nice!"], #  When assignment correct, select a random text
-    "default_feedback_neg": ["Niet helemaal goed", "Nope"], #  When assignment not correct, select a random text
-    "TESTING": False,  #  If true, also shows rated submissions but do not actually rate
+    "API_URL": "https://www.server.com",
+    "API_KEY": "secret personal API key",
+
+    "default_feedback_pos": [
+        "Top gedaan!",
+        "Nice One!",
+    ],
+
+    "default_feedback_neg": [
+        "Niet helemaal goed",
+    ],
+
+    "defaults": [
+        {
+            "short": "Aantal bijlagen",
+            "value": "Het aantal bijlage klopt niet.",
+        },
+        {"short": "Naam bijlagen", "value": "De naamgeving van de bijlage klopt niet."},
+        {
+            "short": "Verkeerde bijlage",
+            "value": "De bijlage hoort niet bij de opdracht",
+        },
+        {
+            "short": "Feedback niet verwerkt",
+            "value": "De vorige feedback is neit verwerkt",
+        },
+    ],
+    
+    "TEST": False,
 }

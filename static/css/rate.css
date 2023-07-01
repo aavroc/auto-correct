@@ -1,3 +1,7 @@
+body {
+    background-color:#f8f8f8;
+}
+
 /* Add a scrollbar to textareas */
 textarea {
     overflow-y: auto;
@@ -126,3 +130,11 @@ input[type="text"]:read-only {
     background-color: #ffdd00;
     color: #000000;
 }
+
+select {
+    background-color: #f4f4f4;
+    color: #000000; /* Make the text color white so it's visible on the black background */
+    font-size: 11px;
+    width: 120px; /* Set a fixed width, adjust as needed */
+}
+
