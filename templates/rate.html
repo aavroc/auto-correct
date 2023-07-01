@@ -143,7 +143,7 @@
                             {% for option in defaults %}
                                 <option value="{{ option.value }}">{{ option.short }}</option>
                             {% endfor %}
-                        </select>&nbsp;&#x2192;
+                        </select>&nbsp;&#129122;
                     </label>
                     <div class="col-sm-6">
                         <textarea id="feedback_{{ loop.index }}" name="feedback[]"
@@ -153,6 +153,7 @@
                     <div class="col-sm-4">
                         <div class="comments-field" onclick="expandTextField(this)">{{ item['comments'] | safe }}</div>
                     </div>
+
                 </div>
 
                 <div class="form-group row">
