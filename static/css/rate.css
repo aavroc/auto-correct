@@ -1,12 +1,14 @@
-body {
-    background-color:#f8f8f8;
+.container {
+    margin-top:20px;
 }
 
 /* Add a scrollbar to textareas */
 textarea {
     overflow-y: auto;
     resize: both;
-    /* Allow the user to resize the textarea */
+    margin-top: 0px;
+    width: 100%;
+    color:#495057;
 }
 
 img,
@@ -36,12 +38,12 @@ iframe.fullsize {
     height: auto;
 }
 
-textarea {
-    margin-top: 15px;
-}
-
 input[type="text"]:read-only {
     background-color: #f4f4f4;
+}
+
+input.rating {
+    width: 40px;
 }
 
 .paper {
@@ -70,6 +72,11 @@ input[type="text"]:read-only {
     color: #707070;
 }
 
+.subscript {
+    margin-top:px;
+    margin-bottom:10px;
+}
+
 .small-grey {
     color: #707070;
     font-size:small;
@@ -96,18 +103,18 @@ input[type="text"]:read-only {
     line-height: 1.3em;
     max-height: 12em;
     overflow: scroll;
-    background-color: white;
+    background-color: rgba(250, 250, 250, 0.9);
 }
 
 .comments-field.expanded {
     overflow: visible;
-    background-color: white;
+    background-color: rgba(250, 250, 250, 0.9);
     max-height: 60em;
 }
 
 .button {
     display: inline-block;
-    margin-right: 20px;
+    margin-left: 4px;
     min-width: 50px;
     padding: 2px 3px;
     font-size: 0.7em;
@@ -138,3 +145,32 @@ select {
     width: 120px; /* Set a fixed width, adjust as needed */
 }
 
+td.top {
+    vertical-align: top;
+}
+
+td.center {
+    vertical-align: center;
+}
+
+.col1 {
+    width:160px;
+}
+
+.col2 {
+    width:550px;
+    padding:10px;
+}
+
+.td-div {
+    width: 100%; 
+    display: flex;
+    justify-content: space-between; /* Creates space between the items in the td */
+    padding:10px;
+}
+.td-left {
+    align-self: flex-start; /* Aligns the items to the left */
+}
+.td-right {
+    align-self: flex-end; /* Aligns the itens to the right */
+}
