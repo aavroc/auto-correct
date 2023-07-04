@@ -9,6 +9,8 @@ from myflaskapp.config import config
 from myflaskapp.validation import TextValidation
 from datetime import datetime
 
+from myflaskapp.getAssignments import getAssignmentInfo
+
 app = Flask(__name__)
 app.jinja_env.add_extension("jinja2.ext.loopcontrols")
 app.config["SECRET_KEY"] = "083rhejwfdnslag9348uerfdijkcs398qCD"
@@ -29,7 +31,6 @@ print(f"tesing: {config['defaults']}")
 canvas = Canvas(API_URL, API_KEY)
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, API_KEY)
-
 
 def _removeTempFiles():
     path = "static/temp/*"
@@ -157,11 +158,13 @@ def getInitials(name):
 
 
 def listUnratedAssignments(item):
+    #  all properties in item are delivered by the API from CMON, we will find allunrated items from the assignment specified in item (json)
     course_id = item["course_id"]
     assignment_id = item["assignment_id"]
     words_in_order = item["words_in_order"]
     file_type = item["file_type"]
     file_name_match = item["file_name"]
+    attachments = item["attachments"]
 
     list_of_dicts = []
 
@@ -188,14 +191,14 @@ def listUnratedAssignments(item):
             user = submission.user["name"]
             print(f"Checking {user} {submission.submitted_at} - {submission.workflow_state}")
 
-        if submission.submitted_at is None:
+        if submission.submitted_at is None: #  no submission present, continue
             continue
-        if not TEST and submission.workflow_state == "graded":
+        if not TEST and submission.workflow_state == "graded": #  if graded (and not in testmode), continue
             continue
-        if TEST and i > 6:
+        if TEST and i > 6: #  if we are testing we could have too many (graded) submissions so stop (break) after 6
             break
 
-        comments = ""
+        comments = "" # get all comments
         for comment in reversed(submission.submission_comments):
             this_date = getDayMonth(comment["created_at"])
             this_initials = getInitials(comment["author_name"])
@@ -268,6 +271,7 @@ def listUnratedAssignments(item):
                 rating = int(int(rating) * 0.8)
                 max_points = int(int(max_points) * 0.8)
 
+            #  each line will contain all info about one attachment
             list_of_dicts.append(
                 {
                     "sort_order": sort_order,
@@ -286,6 +290,7 @@ def listUnratedAssignments(item):
                     "user_id": submission.user["id"],
                     "file_content": file_content,
                     "file_name": attachment.filename,
+                    "attachments": attachments,
                     "file_type": att_file_type,
                     "words_in_order": words_in_order,
                     "words_correct": words_correct,
@@ -337,19 +342,18 @@ def update_grade_and_feedback(posted_variables):
         return f"No access to course {course_id} and/or assignment {assignment_id}"
 
     # Get the submission
-    submissions = assignment.get_submissions(include=["user"])
+    submissions = assignment.get_submissions(include=["user", "submission_comments"])
 
     count = 0
 
-    for submission in submissions:
-        for i, submission_id in enumerate(submission_id_values):
-            # output+=(f"Evaluating {submission.id} and {submission_id}\n")
-            if int(submission.id) == int(submission_id) and int(check_values[i]) == 1:
-                count += 1
-                output += f"\nRating {submission_id} for {submission.user['name']} with rate {rating_values[i]} and feedback {feedback_values[i]}\n"
+    for submission in submissions: #  we have to itterate through all submissions of this assignment to find the ones posted
+        for i, this_submitted_id in enumerate(submission_id_values): #  these are all posted submissions
+            if int(submission.id) == int(this_submitted_id) and int(check_values[i]) == 1: #  when there is a match and we acually want to rate this (check mark checked) we'll rate.
+                count += 1 #  keep a total count, to report back how many in total we have rated
+                output += f"Rate {this_submitted_id}/{submission.attempt} for {submission.user['name']} with {rating_values[i]}, {feedback_values[i]}\n"
                 if not TEST:  # next two lines do the actual rating and feedback submision
                     submission.edit(submission={"posted_grade": str(rating_values[i])})
-                    submission.edit(comment={"text_comment": feedback_values[i]})
+                    submission.edit(comment={"text_comment": feedback_values[i], "attempt": submission.attempt}) #  We have to set the attempt, otherwise it will be none and will be reagerded as 1 (1ste attempt).
 
     output += f"\n\nRated {count} assignments succesfully."
     return output
@@ -401,6 +405,11 @@ def correcta(cohort, assignment_id):
 
     return
 
+
+@app.route("/correctb/<cohort>/<assignment_id>")
+def correctb(cohort, assignment_id):
+    result = getAssignmentInfo(canvas, cohort, assignment_id)
+    return result.assignment_data
 
 @app.route("/submit-ratings", methods=["POST"])
 def submit_ratings():

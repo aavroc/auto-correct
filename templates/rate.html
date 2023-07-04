@@ -67,7 +67,11 @@
                     <label for="Hint" class="col-sm-2 col-form-label">Attachments:</label>
                     <div class="col-sm-6">
                         <div class="col-form-label subscript grey">
-                            {{ item['number_of_att'] }}
+                            {% if item['attachments'] is none or item['number_of_att'] == item['attachments'] %}
+                                {{ item['number_of_att'] }}
+                            {% else %}
+                                <span style="font-weight:bold;color:red;">{{ item['number_of_att'] }}</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
