@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/rate.css') }}">
+    <script src="/static/js/rate.js"></script>
+    <style>
+
+    </style>
+
+    <script>
+
+    </script>
+
+    <title>
+        {% if data[0] is defined %}
+            Rate {{ data[0]['assignment_name'] }}
+        {% else %}
+            Nothing
+        {% endif %}
+    </title>
+</head>
+
+<body>
+    <div class="container">
+        {% if data[0] is defined %}
+        <form action="/submit-ratings" method="POST">
+
+            {% for item in data %}
+
+            <div class="card mb-4 p-3 paper">
+                <h3 class="mb-3">#{{loop.index}} : {{ item.course_name }} - <a
+                        href="https://talnet.instructure.com/courses/{{item['course_id']}}/assignments/{{item['assignment_id']}}"
+                        class="black-link" target=”_blank">{{item.assignment_name }}</a></h3>
+
+                <h5 class="mb-3" style="color:blue;">{{ item.user }}</h5>
+
+                <input id="aid_{{ loop.index }}" type="hidden" name="assignment_id[]"
+                    value="{{ item['assignment_id'] }}">
+                <input id="sid_{{ loop.index }}" type="hidden" name="submission_id[]"
+                    value="{{ item['submission_id'] }}">
+                <input id="cid_{{ loop.index }}" type="hidden" name="course_id[]" value="{{ item['course_id'] }}">
+
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <div class="marked-box" style="background-color:#FDFCF2;">
+                            {{ item['hint'] }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label for="Hint" class="col-sm-2">Attachments:</label>
+                    <div class="col-sm-6">
+                        <div class="subscript grey">
+                            {% if item.att_expected is none or item.number_of_att == item.att_expected %}
+                                {{ item.number_of_att }}
+                            {% else %}
+                                <span style="font-weight:bold;color:red;">{{ item.number_of_att }}</span> (expected {{ item.att_expected }})
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% for att in item.attachements %}
+
+                    {% if att.att_file_type in ['png', 'jpg'] %}
+                        <div class="row margin-top-sm">
+                            <div class="col-sm-2"><span class="small-grey">{{ att['org_file_name'] }}</span></div>
+                            <div class="col-sm-10">
+                                <img src="/{{ att['file_name'] }}" onclick="toggleFullSize(this)" alt="Image">
+                            </div>
+                        </div>
+                    {% elif att.att_file_type == 'pdf' %}
+                        <div class="row margin-top-sm">
+                            <div class="col-sm-2">-</div>
+                            <div class="col-sm-10">
+                                <iframe src="/{{ att['file_name'] }}" alt="PDF"><br>
+                                <a href="/{{ att['file_name'] }}" class="small-link" target="_blank">Open PDF</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="row margin-top-sm">
+                            <div class="col-sm-2"><span class="small-grey">{{ att.org_file_name[:40] }}</span></div>
+                            <div class="col-sm-10">
+                                <textarea id="file_content_{{ loop.index }}" class=""
+                                    rows="15">{{ att.file_content }}</textarea>
+                            </div>
+                        </div>
+                        {% if att.words_in_order[0] is defined and att.words_in_order[0] != "" %}
+                            <div class="row margin-top-sm">
+                                <div class="col-sm-2">
+                                </div>
+                                <div class="col-sm-8">
+                                    <span class="read-only-box">
+                                        {% for word in att.words_in_order %}
+                                            {% if loop.index <= att.words_correct %}
+                                                    <span style="font-weight:bold;color:green;">{{word }}</span>
+                                                {% else %}
+                                                    <span style="font-weight:bold;color:red;">{{ word }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    {% if att.number_of_words == att.words_correct %}
+                                        <span style="font-weight:bold;color:green;">&nbsp;&#10003;</span>
+                                    {% else %}
+                                        <span style="font-weight:bold;color:red;">&nbsp;&#10060;</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                {% endfor %}                 
+                
+
+                <table border="0">
+                    
+                    <tr>
+                        <td colspan="3">
+                            <hr style="margin-top:20px;">
+                        </td>
+                    </tr>
+                  
+                    <tr>
+                        <td class="col1">
+                            <label for="rating" class="">Rating:</label>
+                        </td>
+                        <td class="col2">
+                            <input type="text" id="rating_{{ loop.index }}" name="rating[]" value="{{ item['rating'] }}"
+                            class="rating" onclick="decreaseValue(this, '{{item.points_possible}}')">
+                            &nbsp;
+                            <span class="grey">
+                                {% if item.rating != item.points_possible %}
+                                            <a class="button rate" id="button_rate_{{ loop.index }}"
+                                                    onclick="setFeedbackAndRating('{{ loop.index }}',
+                                                    '{{ item.alt_feedback }}', '{{ item.points_possible }}')">Correct</a>
+                                {% endif %}
+                                (Attempt {{ item.attempt }}, Max points {{ item.max_points }}/{{ item.points_possible }})
+                            </span>
+                        </td>
+                        <td>
+
+                        </td>
+                    </tr>
+                    <tr style="height:100px;">
+                        <td class="col1 top">
+                            <label for="feedback" class="">Feedback:<br>
+                                <select id="comments_{{loop.index}}" class="defaults" onchange="updateRatingField( '{{ loop.index }}', this.value)">
+                                    <option value="">Select...</option>
+                                    {% for option in defaults %}
+                                        <option value="{{ option.value }}">{{ option.short }}</option>
+                                    {% endfor %}
+                                </select>
+                                &nbsp;&#129122;
+                            </label>
+                        </td>
+                        <td class="col2 top">
+                            <textarea id="feedback_{{ loop.index }}" name="feedback[]"
+                                onblur="focusInputField( 'rating_' + '{{ loop.index }}', '{{ item.points_possible }}' )"
+                                class="" rows="5">{{ item.feedback }}</textarea>
+                        </td>
+                        <td rowspan="2" class="top">
+                            <div class="comments-field" onclick="expandTextField(this)">{{ item.comments | safe }}</div>
+                        </td>
+                    </tr>
+
+                    <!-- Rate Check box -->
+                    <tr>
+                        <td class="top">
+                            <label for="feedback" class="">Rate:</label>
+                        </td>
+                        <td class="top">
+                            <div class="td-div top">
+                                <input type="checkbox" id="cb_{{ loop.index }}" name="check_box[]"
+                                    onchange="updateCheckboxValue('{{ loop.index }}')" style="transform: scale(1.5);" class="td-left" checked>
+                                <input type="hidden" name="checked[]" id="hidden_checkbox_{{loop.index}}" value="1">
+                                <a class="button" class="td-right" onclick="rateViaCanvas('{{ loop.index }}', '{{ item.course_id }}', '{{ item.assignment_id }}', '{{ item.user_id }}')">Canvas➞</a>
+                            </div>
+                        </td>
+                    <tr>
+                </table>
+
+
+
+            </div>
+
+            {% endfor %}
+
+            <div class="form-group row text-right">
+                <div class="col-sm-10 offset-sm-2">
+                    {% if alreadySubmitted == 0 %}
+                    <button type="submit" class="btn btn-danger">Rate all checked </button>
+                    {% endif %}
+                </div>
+            </div>
+
+        </form>
+
+        {% else %}
+            <h2>Oops...nothing found to rate.</h2>
+        {% endif %}
+
+    </div>
+
+</body>
+
+</html>

@@ -174,3 +174,8 @@ td.center {
 .td-right {
     align-self: flex-end; /* Aligns the itens to the right */
 }
+
+.margin-top-sm
+{
+    margin-top:7px;
+}

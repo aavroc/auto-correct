@@ -10,10 +10,13 @@ from myflaskapp.config import config
 class getAssignmentInfo:
     def __init__(self, canvas, cohort, assignment_id):
         self.canvas=canvas
-        self.assignment_data = self.getAssignmentDataFromCmon(cohort, assignment_id)
-        return 
-        self.unrated_assignment_data = self.listUnratedAssignments(self.assignment_data)
-        return 
+        self.json_data = self.getAssignmentDataFromCmon(cohort, assignment_id)
+
+        # ToDo do we realy need this, we get one assignment back right?
+        for json_item in self.json_data:
+            if int(assignment_id) == int(json_item["assignment_id"]):
+                self.rating_data = self.listUnratedAssignments(json_item)
+                return
 
     
     def getAssignmentDataFromCmon(self, cohort, assignment_id):
@@ -27,9 +30,11 @@ class getAssignmentInfo:
             print(f"Error: {response.status_code}")
             return f"Error: {response.status_code}"
 
+        return json_data
+
         if not json_data:
             return None
-
+        
         # ToDo do we realy need this, we get one assignment back right?
         for json_item in json_data:
             if int(assignment_id) == int(json_item["assignment_id"]):
@@ -52,8 +57,8 @@ class getAssignmentInfo:
     def getComments(self, submission):
         comments = "" # get all comments
         for comment in reversed(submission.submission_comments):
-            this_date = getDayMonth(comment["created_at"])
-            this_initials = getInitials(comment["author_name"])
+            this_date = self.getDayMonth(comment["created_at"])
+            this_initials = self.getInitials(comment["author_name"])
             comments += (
                 f'<i>{this_date} {this_initials}</i>: {comment["comment"]}<br><br>'
             )
@@ -61,7 +66,7 @@ class getAssignmentInfo:
 
 
     def loadPicture(self, url, picture_file_name):
-        path = "static/temp/img"  # save file to temp directory, ToDo when and how to clean temp dir?
+        path = "static/temp/img/"  # save file to temp directory, ToDo when and how to clean temp dir?
 
         if not os.path.exists(path):
             os.makedirs(path)
@@ -76,7 +81,7 @@ class getAssignmentInfo:
         return file_name
 
 
-    def getAttachments(self, submission):
+    def getAttachments(self, submission, file_type, words_in_order, points_possible, file_name_match):
 
         list_of_dicts = []
 
@@ -99,28 +104,24 @@ class getAssignmentInfo:
 
             rating = None
             file_name = None
+            file_content = None
+            feedback = None
+            words_correct = None
+            rating = None 
+            sort_order=9
+            feedback = self.getFeedback(True)
 
             if att_file_type in ["png", "pdf", "jpg"]:  # no word matching, no auto rating
                 file_name = ( str(submission.id) + "-" + str(attachment.id) + "." + att_file_type )
                 file_name = self.loadPicture( attachment.url, file_name )  # return file name with path
-
-                file_content = ( "fn:" + file_name )  # file content refers to a filename fn: <filename> which is the file name to the picture downloaded
-                feedback = self.getFeedback(True)
-                words_correct = -99
-                rating = ( assignment.points_possible )  # png is not rated automattically, propose higest score.
-
+                sort_order=1
             else:  # anything but a png file, do the word matching
-                file_name = None
                 file_content = response.content.decode()
-                # words_correct, position = validateWords(words_in_order, file_content) #validate text(file_conten) with words (words must appear in text in order and !words may not exists in text)
                 validation = TextValidation(file_content, words_in_order)
                 words_correct = validation.wordsMatched
                 match = validation.match
-
-                # if (position > 1): # position of last found word and will be -1 when a word is not found.
-                if match:
-                    rating = assignment.points_possible
-                    feedback = self.getFeedback(True)
+                if match: #  if (position > 1): # position of last found word and will be -1 when a word is not found.
+                    rating = points_possible
                 else:
                     rating = 0
                     feedback = self.getFeedback(False)
@@ -136,10 +137,12 @@ class getAssignmentInfo:
                     "words_correct": words_correct,
                     "words_in_order": words_in_order,
                     "number_of_words": len(words_in_order),
+                    "sort_order": sort_order,
                 }
             )
 
-            #  We could have more ratings and more feedback at this point.
+        #  sort
+        list_of_dicts = sorted( list_of_dicts, key=lambda x: (x["sort_order"]) )
 
         return list_of_dicts
 
@@ -161,9 +164,9 @@ class getAssignmentInfo:
         words_in_order = item["words_in_order"]
         file_type = item["file_type"]
         file_name_match = item["file_name"]
-        attachments = item["attachments"]
+        att_expected = item["attachments"]
 
-        list_of_dicts = []
+        json_result = []
 
         try:
             course = self.canvas.get_course(course_id)
@@ -193,21 +196,29 @@ class getAssignmentInfo:
 
             comments = "" # get all comments
             for comment in reversed(submission.submission_comments):
-                this_date = getDayMonth(comment["created_at"])
-                this_initials = getInitials(comment["author_name"])
+                this_date = self.getDayMonth(comment["created_at"])
+                this_initials = self.getInitials(comment["author_name"])
                 comments += (
                     f'<i>{this_date} {this_initials}</i>: {comment["comment"]}<br><br>'
                 )
 
             comments = self.getComments(submission)
-            json_attachments = self.getAttachments(submission)
+            json_attachments = self.getAttachments(submission, file_type, words_in_order, assignment.points_possible, file_name_match) #  submission object, file_type to check, words to check, max score possible, file_name to match
 
-            max_points = assignment.points_possible
+            max_points = int(assignment.points_possible)
             if submission.attempt > 3:
                 rating = int(int(rating) * 0.8)
                 max_points = int(int(max_points) * 0.8)
 
-            json_result=(
+            #  determine lowest rated attachment and promote rating and feedback to overall rating and feedback
+            overall_rating = max_points
+            overall_feedback = self.getFeedback(True)  
+            for att in json_attachments:
+                if att['rating'] and att['rating'] < overall_rating:
+                    overall_rating =  att['rating']
+                    overall_feedback = att['feedback']
+
+            json_result.append(
                 {
                     "assignment_id": assignment_id,
                     "assignment_name": assignment.name,
@@ -217,13 +228,19 @@ class getAssignmentInfo:
                     "attempt": submission.attempt,
                     "points_possible": int(assignment.points_possible),
                     "max_points": max_points,
-                    "alt_feedback": getFeedback(True),
+                    "alt_feedback": self.getFeedback(True),
                     "user": submission.user["name"],
                     "user_id": submission.user["id"],
                     "number_of_words": len(words_in_order),
                     "hint": item.get("hint", ""),
                     "comments": comments,
                     "test": TEST,
-                    "attachements": json_attachments
+                    "attachements": json_attachments,
+                    "att_expected": att_expected,
+                    "number_of_att": len(json_attachments),
+                    "rating": overall_rating,
+                    "feedback": overall_feedback
                 }
             )
+
+        return json_result

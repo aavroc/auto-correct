@@ -20,7 +20,7 @@ API_URL = config["API_URL"]
 # Canvas API key
 API_KEY = config["API_KEY"]
 
-FILE_FORM_DATA = "static/temp/formdata.json"  # Global variable for the cached form data
+FILE_FORM_DATA = "static/temp/json/formdata.json"  # Global variable for the cached form data
 
 TEST = config.get("TEST")
 print(f"tesing: {TEST}")
@@ -101,6 +101,7 @@ def loadFormData(file_name=""):
     if not os.path.isfile(file_name):  # Check if file exists
         return False
     with open(file_name, "r") as file:
+        print(f"file: {file}")
         data = json.load(file)
     return data
 
@@ -363,7 +364,7 @@ def update_grade_and_feedback(posted_variables):
 def index():
     results = loadFormData()
     if results:
-        return render_template("rate.html", data=results, defaults=config['defaults'], alreadySubmitted=1 )
+        return render_template("rateb.html", data=results, defaults=config['defaults'], alreadySubmitted=1 )
 
     return render_template("results.html", data="No Data in form cache")
 
@@ -377,8 +378,8 @@ def indexParameter(file_name):
     return render_template("results.html", data="File empty or deleted")
 
 
-@app.route("/correcta/<cohort>/<assignment_id>")
-def correcta(cohort, assignment_id):
+@app.route("/correctb/<cohort>/<assignment_id>")
+def correctb(cohort, assignment_id):
     # read API data
     url = "http://" + cohort + ".cmon.ovh/api/nakijken?aid=" + assignment_id
     print(f"url: {url}")
@@ -406,21 +407,25 @@ def correcta(cohort, assignment_id):
     return
 
 
-@app.route("/correctb/<cohort>/<assignment_id>")
-def correctb(cohort, assignment_id):
+@app.route("/correcta/<cohort>/<assignment_id>")
+def correcta(cohort, assignment_id):
     result = getAssignmentInfo(canvas, cohort, assignment_id)
-    return result.assignment_data
+    saveFormData(result.rating_data)
+    return render_template("rateb.html", data=result.rating_data, defaults=config['defaults'], alreadySubmitted=0 )
 
 @app.route("/submit-ratings", methods=["POST"])
 def submit_ratings():
     results = update_grade_and_feedback(request.form)
     return render_template("results.html", data=results)
 
+@app.route("/json")
+def showJson():
+    results = loadFormData()
+    return results
 
 @app.route("/list")
 def list():
     data = getFormdataFiles()
-    print(f"Data: {data}")
     return render_template("list.html", data=data)
 
 
