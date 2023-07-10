@@ -105,7 +105,6 @@ class getAssignmentInfo:
             rating = None
             file_name = None
             file_content = None
-            feedback = None
             words_correct = None
             rating = None 
             sort_order=9
@@ -143,6 +142,41 @@ class getAssignmentInfo:
 
         #  sort
         list_of_dicts = sorted( list_of_dicts, key=lambda x: (x["sort_order"]) )
+
+        return list_of_dicts
+
+    def getOnlineText(self, submission, words_in_order, points_possible):
+    
+        list_of_dicts = []
+        file_name = None
+        file_content = None
+        sort_order=9
+
+        file_content = submission['body']
+        validation = TextValidation(file_content, words_in_order)
+        words_correct = validation.wordsMatched
+        match = validation.match
+        if match: #  if (position > 1): # position of last found word and will be -1 when a word is not found.
+            rating = points_possible
+            feedback = self.getFeedback(True)
+        else:
+            rating = 0
+            feedback = self.getFeedback(False)
+
+        list_of_dicts.append(
+            {
+                "att_file_type": att_file_type,
+                "org_file_name": attachment.filename,
+                "file_name": file_name,
+                "file_content": file_content,
+                "rating": rating,
+                "feedback": feedback,
+                "words_correct": words_correct,
+                "words_in_order": words_in_order,
+                "number_of_words": len(words_in_order),
+                "sort_order": sort_order,
+            }
+            )
 
         return list_of_dicts
 
@@ -203,7 +237,10 @@ class getAssignmentInfo:
                 )
 
             comments = self.getComments(submission)
-            json_attachments = self.getAttachments(submission, file_type, words_in_order, assignment.points_possible, file_name_match) #  submission object, file_type to check, words to check, max score possible, file_name to match
+            if (submission['submission_type'] == "online_text_entry" ):
+                json_attachment = self.getOnlineText(submission, words_in_order, assignment.points_possible)
+            else:
+                json_attachments = self.getAttachments(submission, file_type, words_in_order, assignment.points_possible, file_name_match) #  submission object, file_type to check, words to check, max score possible, file_name to match
 
             max_points = int(assignment.points_possible)
             if submission.attempt > 3:
