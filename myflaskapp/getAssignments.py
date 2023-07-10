@@ -8,9 +8,10 @@ from myflaskapp.config import config
 
 
 class getAssignmentInfo:
-    def __init__(self, canvas, cohort, assignment_id):
-        self.canvas=canvas
+    def __init__(self, canvas, cohort, assignment_id, test):
+        self.canvas = canvas
         self.json_data = self.getAssignmentDataFromCmon(cohort, assignment_id)
+        self.test = test
 
         # ToDo do we realy need this, we get one assignment back right?
         for json_item in self.json_data:
@@ -145,14 +146,13 @@ class getAssignmentInfo:
 
         return list_of_dicts
 
+
     def getOnlineText(self, submission, words_in_order, points_possible):
     
         list_of_dicts = []
-        file_name = None
-        file_content = None
         sort_order=9
 
-        file_content = submission['body']
+        file_content = submission.body
         validation = TextValidation(file_content, words_in_order)
         words_correct = validation.wordsMatched
         match = validation.match
@@ -165,9 +165,9 @@ class getAssignmentInfo:
 
         list_of_dicts.append(
             {
-                "att_file_type": att_file_type,
-                "org_file_name": attachment.filename,
-                "file_name": file_name,
+                "att_file_type": "online",
+                "org_file_name": "\"online\"",
+                "file_name": None,
                 "file_content": file_content,
                 "rating": rating,
                 "feedback": feedback,
@@ -176,7 +176,7 @@ class getAssignmentInfo:
                 "number_of_words": len(words_in_order),
                 "sort_order": sort_order,
             }
-            )
+        )
 
         return list_of_dicts
 
@@ -191,7 +191,7 @@ class getAssignmentInfo:
         return selected_feedback
 
 
-    def listUnratedAssignments(self, item, TEST=False):
+    def listUnratedAssignments(self, item):
         #  all properties in item are delivered by the API from CMON, we will find allunrated items from the assignment specified in item (json)
         course_id = item["course_id"]
         assignment_id = item["assignment_id"]
@@ -217,15 +217,15 @@ class getAssignmentInfo:
         print(f"Checking course {course_id} assignment {assignment_id}")
 
         for i, submission in enumerate(submissions):
-            if TEST:
+            if self.test:
                 user = submission.user["name"]
                 print(f"Checking {user} {submission.submitted_at} - {submission.workflow_state}")
 
             if submission.submitted_at is None: #  no submission present, continue
                 continue
-            if not TEST and submission.workflow_state == "graded": #  if graded (and not in testmode), continue
+            if not self.test and submission.workflow_state == "graded": #  if graded (and not in testmode), continue
                 continue
-            if TEST and i > 6: #  if we are testing we could have too many (graded) submissions so stop (break) after 6
+            if self.test and i > 6: #  if we are testing we could have too many (graded) submissions so stop (break) after 6
                 break
 
             comments = "" # get all comments
@@ -237,23 +237,23 @@ class getAssignmentInfo:
                 )
 
             comments = self.getComments(submission)
-            if (submission['submission_type'] == "online_text_entry" ):
-                json_attachment = self.getOnlineText(submission, words_in_order, assignment.points_possible)
+            if (submission.submission_type == "online_text_entry" ):
+                json_attachments = self.getOnlineText(submission, words_in_order, assignment.points_possible)
             else:
                 json_attachments = self.getAttachments(submission, file_type, words_in_order, assignment.points_possible, file_name_match) #  submission object, file_type to check, words to check, max score possible, file_name to match
 
-            max_points = int(assignment.points_possible)
-            if submission.attempt > 3:
-                rating = int(int(rating) * 0.8)
-                max_points = int(int(max_points) * 0.8)
-
             #  determine lowest rated attachment and promote rating and feedback to overall rating and feedback
+            max_points = int(assignment.points_possible)
             overall_rating = max_points
             overall_feedback = self.getFeedback(True)  
             for att in json_attachments:
-                if att['rating'] and att['rating'] < overall_rating:
+                if att['rating'] is not None and att['rating'] < overall_rating:
                     overall_rating =  att['rating']
                     overall_feedback = att['feedback']
+
+            if submission.attempt > 3:
+                overall_rating = int(int(overall_rating) * 0.8)
+                max_points = int(int(max_points) * 0.8)
 
             json_result.append(
                 {
@@ -271,7 +271,7 @@ class getAssignmentInfo:
                     "number_of_words": len(words_in_order),
                     "hint": item.get("hint", ""),
                     "comments": comments,
-                    "test": TEST,
+                    "test": self.test,
                     "attachements": json_attachments,
                     "att_expected": att_expected,
                     "number_of_att": len(json_attachments),

@@ -2,12 +2,11 @@
 from flask import Flask, render_template, request, redirect, url_for
 from pathlib import Path
 from canvasapi import Canvas
-import sys, os, json, glob, random, requests
+import os, json, glob, requests
 
 from myflaskapp.myForms import ValidationForm
 from myflaskapp.config import config
 from myflaskapp.validation import TextValidation
-from datetime import datetime
 
 from myflaskapp.getAssignments import getAssignmentInfo
 
@@ -39,7 +38,7 @@ def _removeTempFiles():
         os.remove(f)
 
 
-def loadPicture(url, picture_file_name):
+def _loadPicture(url, picture_file_name):
     path = "static/temp/"  # save file to temp directory, ToDo when and how to clean temp dir?
 
     if not os.path.exists(path):
@@ -134,7 +133,7 @@ def getFormdataFiles():
     return file_data
 
 
-def getFeedback(positief):
+def _getFeedback(positief):
     # ToDo check if config exists and if it is a list.
     if positief:
         selected_feedback = random.choice(config["default_feedback_pos"])
@@ -144,7 +143,7 @@ def getFeedback(positief):
     return selected_feedback
 
 
-def getDayMonth(date_string):
+def _getDayMonth(date_string):
     date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
 
     month = date_object.strftime("%m")  # Full month name
@@ -153,12 +152,12 @@ def getDayMonth(date_string):
     return day + "-" + month
 
 
-def getInitials(name):
+def _getInitials(name):
     name = name.split()
     return name[0][:1].upper() + name[1][:1].upper()
 
 
-def listUnratedAssignments(item):
+def _listUnratedAssignments(item):
     #  all properties in item are delivered by the API from CMON, we will find allunrated items from the assignment specified in item (json)
     course_id = item["course_id"]
     assignment_id = item["assignment_id"]
@@ -324,7 +323,7 @@ def listUnratedAssignments(item):
     return list_of_dicts
 
 
-def update_grade_and_feedback(posted_variables):
+def _update_grade_and_feedback(posted_variables):
     output = ""
     rating_values = request.form.getlist("rating[]")
     feedback_values = request.form.getlist("feedback[]")
@@ -402,26 +401,29 @@ def correctb(cohort, assignment_id):
             results = listUnratedAssignments(item)
             # print(results)
             return render_template(
-                "rate.html", data=results, defaults=config['defaults'], alreadySubmitted=0)  # stop after first hit
+                "rate-old.html", data=results, defaults=config['defaults'], alreadySubmitted=0)  # stop after first hit
 
     return
 
 
 @app.route("/correcta/<cohort>/<assignment_id>")
 def correcta(cohort, assignment_id):
-    result = getAssignmentInfo(canvas, cohort, assignment_id)
+    result = getAssignmentInfo(canvas, cohort, assignment_id, TEST)
     saveFormData(result.rating_data)
-    return render_template("rateb.html", data=result.rating_data, defaults=config['defaults'], alreadySubmitted=0 )
+    return render_template("rate.html", data=result.rating_data, defaults=config['defaults'], alreadySubmitted=0 )
+
 
 @app.route("/submit-ratings", methods=["POST"])
 def submit_ratings():
     results = update_grade_and_feedback(request.form)
     return render_template("results.html", data=results)
 
+
 @app.route("/json")
 def showJson():
     results = loadFormData()
     return results
+
 
 @app.route("/list")
 def list():

@@ -16,8 +16,8 @@ function uncheckCheckBox(i) {
     hiddenCheckboxValue.value = 0;
 }
 
-function toggleFullSize(img) {
-    img.classList.toggle('fullsize');
+function toggleFullSize(node) {
+    node.classList.toggle('fullsize');
 }
 
 function addImage(src, id, text) {
