@@ -117,14 +117,16 @@ class getAssignmentInfo:
                 sort_order=1
             else:  # anything but a png file, do the word matching
                 file_content = response.content.decode()
-                validation = TextValidation(file_content, words_in_order)
-                words_correct = validation.wordsMatched
-                match = validation.match
-                if match: #  if (position > 1): # position of last found word and will be -1 when a word is not found.
-                    rating = points_possible
-                else:
-                    rating = 0
-                    feedback = self.getFeedback(False)
+                print(f" ** Debug (to be removed)**, do we need matching? {att_file_type} == {file_type} and {file_name_match} in {attachment.filename}") #ToDo
+                if (att_file_type == file_type and file_name_match in attachment.filename ): # only perform matchin (auto-coorent) if file type is requested file type, ToDo test this!
+                    validation = TextValidation(file_content, words_in_order)
+                    words_correct = validation.wordsMatched
+                    match = validation.match
+                    if match: #  if (position > 1): # position of last found word and will be -1 when a word is not found.
+                        rating = points_possible
+                    else:
+                        rating = 0
+                        feedback = self.getFeedback(False)
 
             list_of_dicts.append(
                 {
@@ -247,6 +249,7 @@ class getAssignmentInfo:
             overall_rating = max_points
             overall_feedback = self.getFeedback(True)  
             for att in json_attachments:
+                #  if file_type == att['att_file_type']:
                 if att['rating'] is not None and att['rating'] < overall_rating:
                     overall_rating =  att['rating']
                     overall_feedback = att['feedback']
