@@ -31,9 +31,14 @@
             {% for item in data %}
 
             <div class="card mb-4 p-3 paper">
-                <h3 class="mb-3">#{{loop.index}} : {{ item.course_name }} - <a
-                        href="https://talnet.instructure.com/courses/{{item['course_id']}}/assignments/{{item['assignment_id']}}"
-                        class="black-link" target=”_blank">{{item.assignment_name }}</a></h3>
+                <h3 class="mb-3">
+                    {% if test  %}
+                    *** TESTING MODE ***
+                    {% endif %}
+                    #{{loop.index}} : {{ item.course_name }} - 
+                    <a href="https://talnet.instructure.com/courses/{{item['course_id']}}/assignments/{{item['assignment_id']}}"
+                        class="black-link" target=”_blank">{{item.assignment_name }}</a>
+                </h3>
 
                 <h5 class="mb-3" style="color:blue;">{{ item.user }}</h5>
 
@@ -75,9 +80,9 @@
                         </div>
                     {% elif att.att_file_type == 'pdf' %}
                         <div class="row margin-top-sm">
-                            <div class="col-sm-2">-</div>
+                            <div class="col-sm-2"><span class="small-grey">{{ att['org_file_name'] }}</span></div>
                             <div class="col-sm-10">
-                                <iframe src="/{{ att['file_name'] }}" alt="PDF"><br>
+                                <iframe src="/{{ att['file_name'] }}"></iframe><br>
                                 <a href="/{{ att['file_name'] }}" class="small-link" target="_blank">Open PDF</a>
                             </div>
                         </div>
@@ -85,13 +90,7 @@
                         <div class="row margin-top-sm">
                             <div class="col-sm-2"><span class="small-grey">{{ att.org_file_name[:40] }}</span></div>
                             <div class="col-sm-10">
-                                <pre id="file_content_{{ loop.index }}" class="textarea" onclick="toggleFullSize(this)">
-                                    {% if att.att_file_type == 'online' %} 
-                                        {{ att.file_content | safe }}
-                                    {% else %}
-                                        {{ att.file_content }}
-                                    {% endif %}
-                                </pre>
+                                <pre id="file_content_{{ loop.index }}" class="textarea" onclick="toggleFullSize(this)">{% if att.att_file_type == 'online' %}{{ att.file_content | safe }}{% else %}{{ att.file_content }}{% endif %}</pre>
                             </div>
                         </div>
                         {% if att.words_in_order[0] is defined and att.words_in_order[0] != "" %}
@@ -195,8 +194,8 @@
 
             <div class="form-group row text-right">
                 <div class="col-sm-10 offset-sm-2">
-                    {% if alreadySubmitted == 0 %}
-                    <button type="submit" class="btn btn-danger">Rate all checked </button>
+                    {% if alreadySubmitted == 0 and test == False %}
+                        <button type="submit" class="btn btn-danger">Rate all checked </button>
                     {% endif %}
                 </div>
             </div>

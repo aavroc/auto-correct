@@ -22,9 +22,8 @@ API_KEY = config["API_KEY"]
 FILE_FORM_DATA = "static/temp/json/formdata.json"  # Global variable for the cached form data
 
 TEST = config.get("TEST")
-print(f"tesing: {TEST}")
+print(f"testing: {TEST}")
 
-print(f"tesing: {config['defaults']}")
 
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, API_KEY)
@@ -363,7 +362,7 @@ def _update_grade_and_feedback(posted_variables):
 def index():
     results = loadFormData()
     if results:
-        return render_template("rateb.html", data=results, defaults=config['defaults'], alreadySubmitted=1 )
+        return render_template("rate.html", data=results, defaults=config['defaults'], alreadySubmitted=1 )
 
     return render_template("results.html", data="No Data in form cache")
 
@@ -410,7 +409,7 @@ def correctb(cohort, assignment_id):
 def correcta(cohort, assignment_id):
     result = getAssignmentInfo(canvas, cohort, assignment_id, TEST)
     saveFormData(result.rating_data)
-    return render_template("rate.html", data=result.rating_data, defaults=config['defaults'], alreadySubmitted=0 )
+    return render_template("rate.html", data=result.rating_data, defaults=config['defaults'], alreadySubmitted=0, test=TEST )
 
 
 @app.route("/submit-ratings", methods=["POST"])

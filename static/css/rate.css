@@ -26,7 +26,7 @@ textarea {
 }
 
 img,
-iframe {
+xiframe {
     width: 400px;
     transition: width 0.5s ease;
     height: auto;
