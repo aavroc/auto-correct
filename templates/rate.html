@@ -60,7 +60,7 @@
                     <label for="Hint" class="col-sm-2">Attachments:</label>
                     <div class="col-sm-6">
                         <div class="subscript grey">
-                            {% if item.att_expected is none or item.number_of_att == item.att_expected %}
+                            {% if item.att_expected is none or item.number_of_att|int == item.att_expected|int %}
                                 {{ item.number_of_att }}
                             {% else %}
                                 <span style="font-weight:bold;color:red;">{{ item.number_of_att }}</span> (expected {{ item.att_expected }})
@@ -96,9 +96,14 @@
                         {% if att.words_in_order[0] is defined and att.words_in_order[0] != "" %}
                             <div class="row margin-top-sm">
                                 <div class="col-sm-2">
-                                </div>
-                                <div class="col-sm-8">
-                                    <span class="read-only-box">
+                                    {% if att.number_of_words == att.words_correct %}
+                                    <span style="font-weight:normal;color:green;">&nbsp;&#10003;</span>
+                                    {% else %}
+                                        <span style="font-weight:normal;color:red;">&nbsp;&#10060;</span>
+                                    {% endif %}
+                                    </div>
+                                <div class="col-sm-8" class="read-only-box">
+                                   
                                         {% for word in att.words_in_order %}
                                             {% if loop.index <= att.words_correct %}
                                                     <span style="font-weight:bold;color:green;">{{word }}</span>
@@ -106,12 +111,7 @@
                                                     <span style="font-weight:bold;color:red;">{{ word }}</span>
                                             {% endif %}
                                         {% endfor %}
-                                    </span>
-                                    {% if att.number_of_words == att.words_correct %}
-                                        <span style="font-weight:bold;color:green;">&nbsp;&#10003;</span>
-                                    {% else %}
-                                        <span style="font-weight:bold;color:red;">&nbsp;&#10060;</span>
-                                    {% endif %}
+                                   
                                 </div>
                             </div>
                         {% endif %}

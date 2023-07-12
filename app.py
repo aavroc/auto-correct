@@ -362,7 +362,7 @@ def _update_grade_and_feedback(posted_variables):
 def index():
     results = loadFormData()
     if results:
-        return render_template("rate.html", data=results, defaults=config['defaults'], alreadySubmitted=1 )
+        return render_template("rate.html", data=results, defaults=config['defaults'], alreadySubmitted=1, test=TEST )
 
     return render_template("results.html", data="No Data in form cache")
 
