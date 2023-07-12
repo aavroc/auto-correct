@@ -225,7 +225,7 @@ class getAssignmentInfo:
                 continue
             if not self.test and submission.workflow_state == "graded": #  if graded (and not in testmode), continue
                 continue
-            if self.test and i > 6: #  if we are testing we could have too many (graded) submissions so stop (break) after 6
+            if self.test and i > 10: #  if we are testing we could have too many (graded) submissions so stop (break) after 6
                 break
 
             comments = "" # get all comments

@@ -408,6 +408,8 @@ def correctb(cohort, assignment_id):
 @app.route("/correcta/<cohort>/<assignment_id>")
 def correcta(cohort, assignment_id):
     result = getAssignmentInfo(canvas, cohort, assignment_id, TEST)
+    if ( result.json_data == [] ):
+        return "No auto-corect data in CMON for this assignemnt"
     saveFormData(result.rating_data)
     return render_template("rate.html", data=result.rating_data, defaults=config['defaults'], alreadySubmitted=0, test=TEST )
 
