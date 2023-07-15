@@ -206,6 +206,15 @@
             <h2>Oops...nothing found to rate.</h2>
         {% endif %}
 
+        <small class="light-grey">
+            page retrieved in {{ time_elapsed | int }} ms
+            <br>
+            {% for warning in warnings %}
+                {{ warning }}<br>
+            {% endfor %}
+        </small>
+        <br><br><br>
+
     </div>
 
 </body>

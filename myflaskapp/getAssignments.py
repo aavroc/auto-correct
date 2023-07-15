@@ -16,6 +16,7 @@ class getAssignmentInfo:
         self.threads = []
         self.json_data = []
         self.rating_data = []
+        self.warnings = []
 
         self.start_time = time.time()
 
@@ -117,15 +118,16 @@ class getAssignmentInfo:
         list_of_dicts = []
 
         for attachment in submission.attachments:
-
             att_file_type = Path(attachment.filename).suffix.lower()[1:]
 
             if att_file_type not in ["png", "pdf", "jpg"]: # this are the unrated file types
                 if ( att_file_type != file_type.lower() ):  # does the filename extentsion mach the required one?
-                    print(f"Skipping {attachment.filename}")
+                    print(f"  Skipping { attachment.filename } for { submission.user['name'] }")
+                    self.warnings.append(f"Skipping { attachment.filename } for { submission.user['name'] } becasue extention does not match (and is not png, pdf or jpg)")
                     continue
 
                 if ( file_name_match != None and file_name_match not in attachment.filename ):  # when defined, check if the filename is correct.
+                    self.warnings.append(f"Skipping { attachment.filename } for { submission.user['name'] } because file name does not match")
                     continue
 
             rating = None
@@ -135,11 +137,6 @@ class getAssignmentInfo:
             rating = None 
             sort_order=9
             feedback = self.getFeedback(True)
-
-            # response = requests.get(attachment.url, allow_redirects=True)
-            # if response.status_code != 200:
-            #     print(f"Failed to download file: {attachment['url']}")
-            #     continue
 
             if att_file_type in ["png", "pdf", "jpg"]:  # no word matching, no auto rating
                 file_name = ( str(submission.id) + "-" + str(attachment.id) + "." + att_file_type )
@@ -318,7 +315,7 @@ class getAssignmentInfo:
 
         for i, submission in enumerate(submissions):
 
-            if self.test and i > 10: #  if we are testing we could have too many (graded) submissions so stop (break) after 6
+            if self.test and i > 20: #  if we are testing we could have too many (graded) submissions so stop (break) after 6
                 break
 
             # each assignment is processed in a seperate thread

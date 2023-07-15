@@ -115,14 +115,14 @@ def correcta(cohort, assignment_id):
     
     if ( result.json_data == [] ):
         return "No auto-corect data in CMON for this assignemnt"
-        
+
     saveFormData(result.rating_data)
 
     end = time.time()
     elapsed_time_ms = (end - start) * 1000  # Convert seconds to milliseconds
     print(f"Total time elapsed: {elapsed_time_ms} ms")
 
-    return render_template("rate.html", data=result.rating_data, defaults=config['defaults'], alreadySubmitted=0, test=TEST )
+    return render_template("rate.html", data=result.rating_data, defaults=config['defaults'], alreadySubmitted=0, test=TEST, time_elapsed=elapsed_time_ms, warnings=result.warnings )
 
 
 @app.route("/submit-ratings", methods=["POST"]) #  perform the actual rating
