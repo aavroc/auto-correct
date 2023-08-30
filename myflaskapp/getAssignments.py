@@ -10,6 +10,7 @@ import time
 
 
 class getAssignmentInfo:
+
     def __init__(self, canvas, cohort, assignment_id, test):
         self.canvas = canvas
         self.test = test
@@ -30,13 +31,14 @@ class getAssignmentInfo:
                 self.wait_for_all_threads()
                 return
 
+    
     def print_time(self, message=''):
         end = time.time()
         elapsed_time_ms = (end - self.start_time) * 1000  # Convert seconds to milliseconds
         if (message):
             print(f"{message}, ", end="")
         print(f"time elapsed: {elapsed_time_ms} ms")
-
+    
     
     def getAssignmentDataFromCmon(self, cohort, assignment_id):
         url = "http://" + cohort + ".cmon.ovh/api/nakijken?aid=" + assignment_id
@@ -84,7 +86,7 @@ class getAssignmentInfo:
         return comments
 
 
-    def downloadPicture(self, url, file_name):
+    def downloadPicture(self, url, file_name): #  multi threaded
         page = requests.get(url)
         with open(file_name, "wb") as f:
             f.write(page.content)
@@ -220,7 +222,7 @@ class getAssignmentInfo:
         return selected_feedback
 
 
-    def getOneAssignment(self, course, assignment, submission, params):
+    def getOneAssignment(self, course, assignment, submission, params): #  multi threaded
         course_id = params["course_id"]
         assignment_id = params["assignment_id"]
         words_in_order = params['words_in_order']
