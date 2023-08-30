@@ -207,8 +207,10 @@
         {% endif %}
 
         <small class="light-grey">
-            page retrieved in {{ time_elapsed | int }} ms
-            <br>
+            {% if (time_elapsed) %}
+                page retrieved in {{ time_elapsed | int }} ms
+                <br>
+            {% endif %}
             {% for warning in warnings %}
                 {{ warning }}<br>
             {% endfor %}
