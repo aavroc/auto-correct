@@ -122,7 +122,7 @@ class getAssignmentInfo:
         for attachment in submission.attachments:
             att_file_type = Path(attachment.filename).suffix.lower()[1:]
 
-            if att_file_type not in ["png", "pdf", "jpg"]: # this are the unrated file types
+            if att_file_type not in ["png", "pdf", "jpg", "zip"]: # this are the unrated file types
                 if ( att_file_type != file_type.lower() ):  # does the filename extentsion mach the required one?
                     print(f"  Skipping { attachment.filename } for { submission.user['name'] }")
                     self.warnings.append(f"Skipping { attachment.filename } for { submission.user['name'] } becasue extention does not match (and is not png, pdf or jpg)")
@@ -140,7 +140,7 @@ class getAssignmentInfo:
             sort_order=9
             feedback = self.getFeedback(True)
 
-            if att_file_type in ["png", "pdf", "jpg"]:  # no word matching, no auto rating
+            if att_file_type in ["png", "pdf", "jpg", "zip"]:  # no word matching, no auto rating
                 file_name = ( str(submission.id) + "-" + str(attachment.id) + "." + att_file_type )
                 file_name = self.loadPicture( attachment.url, file_name )  # return file name with path
                 sort_order=1
