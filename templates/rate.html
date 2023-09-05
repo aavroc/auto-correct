@@ -93,7 +93,7 @@
                                 <pre id="file_content_{{ loop.index }}" class="textarea" onclick="toggleFullSize(this)">{% if att.att_file_type == 'online' %}{{ att.file_content | safe }}{% else %}{{ att.file_content }}{% endif %}</pre>
                             </div>
                         </div>
-                        {% if att.words_in_order[0] is defined and att.words_in_order[0] != "" %}
+                        {% if att.words_in_order[0] is defined and att.words_in_order[0] != "" and att.words_correct is not none %}
                             <div class="row margin-top-sm">
                                 <div class="col-sm-2">
                                     {% if att.number_of_words == att.words_correct %}
@@ -105,7 +105,7 @@
                                 <div class="col-sm-8" class="read-only-box">
                                    
                                         {% for word in att.words_in_order %}
-                                            {% if loop.index <= att.words_correct %}
+                                            {% if att.words_correct is not none and loop.index <= att.words_correct %}
                                                     <span style="font-weight:bold;color:green;">{{word }}</span>
                                                 {% else %}
                                                     <span style="font-weight:bold;color:red;">{{ word }}</span>
@@ -166,7 +166,7 @@
                                 class="" rows="5">{{ item.feedback }}</textarea>
                         </td>
                         <td rowspan="2" class="top">
-                            <div class="comments-field" onclick="expandTextField(this)">{{ item.comments | safe }}</div>
+                            <div class="comments-field" onclick="expandTextField(this)">{{ item.comments }}</div>
                         </td>
                     </tr>
 

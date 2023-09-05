@@ -154,6 +154,9 @@ def correcta(cohort, assignment_id):
 
     saveFormData(result.rating_data)
 
+    # return  result.rating_data
+    # sys.exit()
+
     end = time.time()
     elapsed_time_ms = (end - start) * 1000  # Convert seconds to milliseconds
     print(f"Total time elapsed: {elapsed_time_ms} ms")
