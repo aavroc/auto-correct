@@ -122,15 +122,18 @@ class getAssignmentInfo:
         for attachment in submission.attachments:
             att_file_type = Path(attachment.filename).suffix.lower()[1:]
 
-            if att_file_type not in ["png", "pdf", "jpg", "zip"]: # this are the unrated file types
-                if ( att_file_type != file_type.lower() ):  # does the filename extentsion mach the required one?
-                    print(f"  Skipping { attachment.filename } for { submission.user['name'] }")
-                    self.warnings.append(f"Skipping { attachment.filename } for { submission.user['name'] } becasue extention does not match (and is not png, pdf or jpg)")
-                    continue
+            # if att_file_type not in ["png", "pdf", "jpg", "zip"]: # this are the unrated file types
 
-                if ( file_name_match != None and file_name_match not in attachment.filename ):  # when defined, check if the filename is correct.
-                    self.warnings.append(f"Skipping { attachment.filename } for { submission.user['name'] } because file name does not match")
-                    continue
+                # Always show all attachments
+
+                # if ( False or att_file_type != file_type.lower() ):  # does the filename extentsion match the required one?
+                #     print(f"  Skipping { attachment.filename } for { submission.user['name'] }")
+                #     self.warnings.append(f"Skipping { attachment.filename } for { submission.user['name'] } becasue extention does not match (and is not png, pdf or jpg)")
+                #     continue
+
+                # if ( file_name_match != None and file_name_match not in attachment.filename ):  # when defined, check if the filename is correct.
+                #     self.warnings.append(f"Skipping { attachment.filename } for { submission.user['name'] } because file name does not match")
+                #     continue
 
             rating = None
             file_name = None
@@ -147,7 +150,7 @@ class getAssignmentInfo:
             else:  # anything but a png file, do the word matching
                 response = requests.get(attachment.url, allow_redirects=True)
                 file_content = response.content.decode()
-                if (True or att_file_type == file_type and file_name_match in attachment.filename ): # only perform matchin (auto-coorent) if file type is requested file type, ToDo test this!
+                if (True or att_file_type == file_type and file_name_match in attachment.filename ): # only perform matching (auto-correct) if file type is requested file type, ToDo test this!
                     validation = TextValidation(file_content, words_in_order)
                     words_correct = validation.wordsMatched
                     match = validation.match
@@ -257,7 +260,11 @@ class getAssignmentInfo:
         #  determine lowest rated attachment and promote rating and feedback to overall rating and feedback
         max_points = int(assignment.points_possible)
         overall_rating = max_points
-        overall_feedback = self.getFeedback(True)  
+        overall_feedback = self.getFeedback(True)
+        if att_expected is not None and int(len(submission.attachments)) != int(att_expected):
+            overall_rating = 0
+            overall_feedback = "Opdracht kan niet worden beoordeeld omdat het aantal bijlagen (attachments) niet correct is."
+
         for att in json_attachments:
             #  if file_type == att['att_file_type']:
             if att['rating'] is not None and att['rating'] < overall_rating:
@@ -287,7 +294,7 @@ class getAssignmentInfo:
                 "test": self.test,
                 "attachements": json_attachments,
                 "att_expected": att_expected,
-                "number_of_att": len(json_attachments),
+                "number_of_att": len(submission.attachments),
                 "rating": overall_rating,
                 "feedback": overall_feedback
             }
