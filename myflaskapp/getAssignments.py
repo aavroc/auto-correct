@@ -8,6 +8,7 @@ from myflaskapp.config import config
 import threading
 import time
 
+from mulitprocessing import Pool
 
 class getAssignmentInfo:
 
