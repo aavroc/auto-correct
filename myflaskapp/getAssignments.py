@@ -8,8 +8,6 @@ from myflaskapp.config import config
 import threading
 import time
 
-from mulitprocessing import Pool
-
 class getAssignmentInfo:
 
     def __init__(self, canvas, cohort, assignment_id, test):
