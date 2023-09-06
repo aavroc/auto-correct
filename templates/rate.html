@@ -166,7 +166,7 @@
                                 class="" rows="5">{{ item.feedback }}</textarea>
                         </td>
                         <td rowspan="2" class="top">
-                            <div class="comments-field" onclick="expandTextField(this)">{{ item.comments }}</div>
+                            <div class="comments-field" onclick="expandTextField(this)">{{ item.comments | safe }}</div>
                         </td>
                     </tr>
 
