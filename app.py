@@ -2,7 +2,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from pathlib import Path
 from canvasapi import Canvas
-import os, json, glob, requests
+import os, json, glob, requests, sys
 
 from myflaskapp.myForms import ValidationForm
 from myflaskapp.config import config
@@ -11,7 +11,9 @@ from myflaskapp.validation import TextValidation
 from myflaskapp.getAssignments import getAssignmentInfo
 import time
 
+
 app = Flask(__name__)
+
 app.jinja_env.add_extension("jinja2.ext.loopcontrols")
 app.config["SECRET_KEY"] = "083rhejwfdnslag9348uerfdijkcs398qCD"
 
