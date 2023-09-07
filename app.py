@@ -12,7 +12,8 @@ from myflaskapp.getAssignments import getAssignmentInfo
 import time
 
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='./templates', static_folder='./static')
+
 
 app.jinja_env.add_extension("jinja2.ext.loopcontrols")
 app.config["SECRET_KEY"] = "083rhejwfdnslag9348uerfdijkcs398qCD"
