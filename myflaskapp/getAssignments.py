@@ -7,6 +7,7 @@ from pathlib import Path
 from myflaskapp.config import config
 import threading
 import time
+import re
 
 class getAssignmentInfo:
 
@@ -73,7 +74,7 @@ class getAssignmentInfo:
         name = name.split()
         return name[0][:1].upper() + name[1][:1].upper()
 
-    def strip_html_tags(html_string):
+    def strip_html_tags(self, html_string):
         # Match HTML tags
         tags = re.findall(r'<.*?>', html_string)
         
@@ -91,7 +92,7 @@ class getAssignmentInfo:
             this_initials = self.getInitials(comment["author_name"])
             stripped_comments = self.strip_html_tags(comment["comment"])
             comments += (
-                f'<i>!! {this_date} {this_initials}</i>: stripped_comments <br><br>'
+                f'•<i>{this_date} {this_initials}</i>: {stripped_comments} <br><br>'
             )
         return comments
 

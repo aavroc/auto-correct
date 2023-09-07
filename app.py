@@ -21,6 +21,8 @@ API_URL = config["API_URL"]
 API_KEY = config["API_KEY"]
 
 FILE_FORM_DATA = "static/temp/json/formdata.json"  # Global variable for the cached form data
+if not os.path.exists(os.path.dirname(FILE_FORM_DATA)):
+    os.makedirs(os.path.dirname(FILE_FORM_DATA))
 
 TEST = config.get("TEST")
 print(f"testing: {TEST}")
