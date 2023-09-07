@@ -72,7 +72,7 @@
 
                 {% for att in item.attachements %}
 
-                    {% if att.att_file_type in ['png', 'jpg'] %}
+                    {% if att.att_file_type in ['png', 'jpg', 'jpeg'] %}
                         <div class="row margin-top-sm">
                             <div class="col-sm-2"><span class="small-grey">{{ att['org_file_name'] }}</span></div>
                             <div class="col-sm-10">
