@@ -73,14 +73,25 @@ class getAssignmentInfo:
         name = name.split()
         return name[0][:1].upper() + name[1][:1].upper()
 
+    def strip_html_tags(html_string):
+        # Match HTML tags
+        tags = re.findall(r'<.*?>', html_string)
+        
+        # Replace each tag with a stripped version (remove <, /, and >)
+        for tag in tags:
+            stripped_tag = tag.replace("<", "").replace(">", "").replace("/", "")
+            html_string = html_string.replace(tag, stripped_tag)
+            
+        return html_string
 
     def getComments(self, submission):
         comments = "" # get all comments
         for comment in reversed(submission.submission_comments):
             this_date = self.getDayMonth(comment["created_at"])
             this_initials = self.getInitials(comment["author_name"])
+            stripped_comments = self.strip_html_tags(comment["comment"])
             comments += (
-                f'<i>{this_date} {this_initials}</i>: {comment["comment"]}<br><br>'
+                f'<i>!! {this_date} {this_initials}</i>: stripped_comments <br><br>'
             )
         return comments
 
@@ -142,14 +153,14 @@ class getAssignmentInfo:
             sort_order=9
             feedback = self.getFeedback(True)
 
-            if att_file_type in ["png", "pdf", "jpg", "zip"]:  # no word matching, no auto rating
+            if att_file_type in ["png", "pdf", "jpg", "zip", "jpeg"]:  # no word matching, no auto rating
                 file_name = ( str(submission.id) + "-" + str(attachment.id) + "." + att_file_type )
                 file_name = self.loadPicture( attachment.url, file_name )  # return file name with path
                 sort_order=1
             else:  # anything but a png file, do the word matching
                 response = requests.get(attachment.url, allow_redirects=True)
-                file_content = response.content.decode()
-                if (True or att_file_type == file_type and file_name_match in attachment.filename ): # only perform matching (auto-correct) if file type is requested file type, ToDo test this!
+                file_content = response.content.decode('utf-8', errors='replace')
+                if (att_file_type == file_type and file_name_match in attachment.filename ): # only perform matching (auto-correct) if file type is requested file type, ToDo test this!
                     validation = TextValidation(file_content, words_in_order)
                     words_correct = validation.wordsMatched
                     match = validation.match
@@ -242,15 +253,8 @@ class getAssignmentInfo:
         if not self.test and submission.workflow_state == "graded": #  if graded (and not in testmode), continue
             return
 
-        comments = "" # get all comments
-        for comment in reversed(submission.submission_comments):
-            this_date = self.getDayMonth(comment["created_at"])
-            this_initials = self.getInitials(comment["author_name"])
-            comments += (
-                f'<i>{this_date} {this_initials}</i>: {comment["comment"]}<br><br>'
-            )
-
         comments = self.getComments(submission)
+
         if (submission.submission_type == "online_text_entry" ):
             json_attachments = self.getOnlineText(submission, words_in_order, assignment.points_possible)
         else:
@@ -273,6 +277,7 @@ class getAssignmentInfo:
         if submission.attempt > 3:
             overall_rating = int(int(overall_rating) * 0.8)
             max_points = int(int(max_points) * 0.8)
+
 
         self.rating_data.append(
              {
@@ -315,10 +320,11 @@ class getAssignmentInfo:
 
         # Get all submissions
         submissions = assignment.get_submissions(bucket="ungraded", include=["user", "submission_comments"])
+        submission_count = sum(1 for _ in submissions)
 
         # removeTempFiles() # ToDo remove files when rating is done!?
 
-        print(f"Checking course {course_id} assignment {assignment_id}")
+        print(f"Checking course {course_id} assignment {assignment_id}, found {submission_count} submissions")
 
         for i, submission in enumerate(submissions):
 

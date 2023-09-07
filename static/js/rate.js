@@ -90,7 +90,7 @@ function focusInputField(targetId, points_possible) {
             target.value = newValue;
             target.focus();
             target.select();
-        }, 1200);
+        }, 400);
     }
 }
 
@@ -124,13 +124,13 @@ function setFeedbackAndRating(itemNr, alt_feedback, maxRating) {
 function decreaseValue(inputField, maxValue) {
     var currentValue = parseInt(inputField.value, 10);
     
-    if (currentValue === 0) {
-        inputField.value = maxValue;
+    if ( currentValue === parseInt(maxValue) ) {
+        inputField.value = 0;
     } else {
-        if ( currentValue > 15 ) {
-            inputField.value = currentValue - 2;
+        if ( currentValue > 5 ) {
+            inputField.value = currentValue + 2;
         } else {
-            inputField.value = currentValue - 1;
+            inputField.value = currentValue + 1;
         }
     }
 }

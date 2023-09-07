@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/rate.css') }}">
     <script src="/static/js/rate.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
 
     </style>
@@ -141,6 +142,7 @@
                                     <a class="button rate" id="button_rate_{{ loop.index }}"  onclick="setFeedbackAndRating('{{ loop.index }}',
                                         '{{ item.alt_feedback }}', '{{ item.max_points }}')">Correct</a>
                                 {% endif %}
+                                <!-- <span id="chooseRating_{{ loop.index }}"></span> -->
                                 (Attempt {{ item.attempt }}, Max points {{ item.max_points }}/{{ item.points_possible }})
                             </span>
                         </td>
@@ -186,9 +188,31 @@
                     <tr>
                 </table>
 
-
-
             </div>
+
+            <!-- <script>
+                 var max_points = {{ item.max_points }};  // Assume this is 10
+
+                // Generate the five links, each with 20% decrement
+                for(var i = 1; i < 5; i++) {
+                    var value = Math.round(max_points - (max_points * 0.2 * i));
+                    var link = $('<a href="#"></a>').text(value);
+
+                    link.attr('onclick', "setFeedbackAndRating('{{ loop.index }}', '{{ item.alt_feedback }}', "+value+")");
+
+                    // Add the class 'button' to each link
+                    link.addClass('button rate');
+
+                    // Attach a click event listener to each link to update the input value
+                    // link.click(function(event) {
+                    //     event.preventDefault();
+                    //     $('#button_rate_'+{{ loop.index }}).val($(this).text());
+                    // });
+
+                    // Append the link to the linkContainer div
+                    $('#chooseRating_'+{{ loop.index }}).append(link).append(' ');  // Adding a space for separation
+                }
+            </script> -->
 
             {% endfor %}
 
