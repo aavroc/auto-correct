@@ -72,7 +72,7 @@
 
                 {% for att in item.attachements %}
 
-                    {% if att.att_file_type in ['png', 'jpg', 'jpeg'] %}
+                    {% if att.att_file_type in ["png", "jpg", "jpeg", "webp"] %}
                         <div class="row margin-top-sm">
                             <div class="col-sm-2"><span class="small-grey">{{ att['org_file_name'] }}</span></div>
                             <div class="col-sm-10">
@@ -85,6 +85,13 @@
                             <div class="col-sm-10">
                                 <iframe src="/{{ att['file_name'] }}"></iframe><br>
                                 <a href="/{{ att['file_name'] }}" class="small-link" target="_blank">Open PDF</a>
+                            </div>
+                        </div>
+                    {% elif att.att_file_type == 'zip' %}
+                        <div class="row margin-top-sm">
+                            <div class="col-sm-2"><a  href="/{{ att['file_name'] }}" class="small-grey">{{ att['org_file_name'] }}</a></div>
+                            <div class="col-sm-10">
+                                {{ att.file_content }}
                             </div>
                         </div>
                     {% else %}

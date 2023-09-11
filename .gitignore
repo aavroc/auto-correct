@@ -6,3 +6,4 @@ data_cache.json
 __pycache__
 build
 dist
+temp_att

@@ -1,8 +1,8 @@
 # app.py
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 from pathlib import Path
 from canvasapi import Canvas
-import os, json, glob, requests, sys
+import os, json, glob, requests, sys, shutil
 
 from myflaskapp.myForms import ValidationForm
 from myflaskapp.config import config
@@ -12,8 +12,15 @@ from myflaskapp.getAssignments import getAssignmentInfo
 import time
 
 
-app = Flask(__name__, template_folder='./templates', static_folder='./static')
+try:
+    config_code = open("./config.py").read()
+except Exception as e:
+    print(f"An error occurred while reading the file: {e}")
+    sys.exit()
 
+exec(config_code)
+
+app = Flask(__name__, template_folder='./templates', static_folder='./static')
 
 app.jinja_env.add_extension("jinja2.ext.loopcontrols")
 app.config["SECRET_KEY"] = "083rhejwfdnslag9348uerfdijkcs398qCD"
@@ -23,18 +30,47 @@ API_URL = config["API_URL"]
 # Canvas API key
 API_KEY = config["API_KEY"]
 
-FILE_FORM_DATA = "static/temp/json/formdata.json"  # Global variable for the cached form data
+
+if getattr(sys, 'frozen', False):  # If the application is run as a bundle (compiled into an executable)
+    application_path = os.path.dirname(sys.executable)
+else:  # If the application is run as a script (not compiled into an executable)
+    application_path = os.path.dirname(os.path.abspath(__file__))
+
+
+print(f"The application is running from: {application_path}")
+temp_dir = os.path.join(application_path, 'temp_att')
+print(f"Temp dir: {temp_dir}")
+if os.path.exists(temp_dir):
+    print(f"Cleaning up {temp_dir}")
+    shutil.rmtree(temp_dir)
+
+FILE_FORM_DATA = "temp_att/formdata.json"  # Global variable for the cached form data
+print(f"form-data json file: {FILE_FORM_DATA}")
+
 if not os.path.exists(os.path.dirname(FILE_FORM_DATA)):
     os.makedirs(os.path.dirname(FILE_FORM_DATA))
 
 TEST = config.get("TEST")
-print(f"testing: {TEST}")
+print(f"Testing status: {TEST}")
+
+print(f"Version 11-09-23")
 
 
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, API_KEY)
 # Initialize a new Canvas object
 canvas = Canvas(API_URL, API_KEY)
+
+
+@app.route('/temp_att/<file_name>')  # temp files will be requested by the webserver and are converted into a file read request
+def temp_image(file_name):
+    file_base, file_extension = os.path.splitext(os.path.basename(file_name))
+    file_extension = file_extension[1:]
+    abs_file_name = os.path.join(application_path,'temp_att/'+file_name)
+    if ( file_extension == 'pdf' ):
+        return send_file(abs_file_name, mimetype='application/pdf')
+    else:
+        return send_file(abs_file_name, mimetype='image/' + file_extension )
 
 
 def saveFormData(data):
@@ -128,6 +164,8 @@ def update_grade_and_feedback(posted_variables):
                     submission.edit(comment={"text_comment": feedback_values[i], "attempt": submission.attempt}) #  We have to set the attempt, otherwise it will be none and will be reagerded as 1 (1ste attempt).
 
     output += f"\n\nRated {count} assignments succesfully."
+    print(f"Rated {count} assignments succesfully.")
+
     return output
 
 
@@ -210,5 +248,5 @@ def validationtest():
     )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)

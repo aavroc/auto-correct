@@ -76,6 +76,9 @@ function expandTextField(element) {
 function focusInputField(targetId, points_possible) {
     var target = document.getElementById(targetId);
     var oldValue = parseFloat(target.value);
+    if ( oldValue != points_possible ) { // when value is lower than max, don;t change it again
+        return
+    }
     var newValue = Math.floor(points_possible * 0.25);
 
     if (!isNaN(oldValue)) {
@@ -122,16 +125,23 @@ function setFeedbackAndRating(itemNr, alt_feedback, maxRating) {
 }
 
 function decreaseValue(inputField, maxValue) {
-    var currentValue = parseInt(inputField.value, 10);
-    
-    if ( currentValue === parseInt(maxValue) ) {
-        inputField.value = 0;
+    var currentValue = parseInt( inputField.value, 10 );
+    var maxValue = parseInt( maxValue );
+
+    if ( maxValue > 5 ) {
+        step = 2;
     } else {
-        if ( currentValue > 5 ) {
-            inputField.value = currentValue + 2;
+        step = 1;
+    }
+    
+    if ( currentValue + step > maxValue ) {
+        if ( currentValue != maxValue ) {
+            inputField.value = maxValue;
         } else {
-            inputField.value = currentValue + 1;
+            inputField.value = 0;
         }
+    } else {
+        inputField.value = currentValue + step;
     }
 }
 

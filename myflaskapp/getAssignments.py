@@ -8,6 +8,10 @@ from myflaskapp.config import config
 import threading
 import time
 import re
+import sys
+
+from zipfile import ZipFile
+from io import BytesIO
 
 class getAssignmentInfo:
 
@@ -104,7 +108,7 @@ class getAssignmentInfo:
 
 
     def loadPicture(self, url, picture_file_name):
-        path = "static/temp/img/"  # save file to temp directory, ToDo when and how to clean temp dir?
+        path = "temp_att/"  # save file to temp directory, ToDo when and how to clean temp dir?
 
         if not os.path.exists(path):
             os.makedirs(path)
@@ -118,6 +122,13 @@ class getAssignmentInfo:
             # self.downloadPicture(url, file_name)
 
         return file_name
+
+
+    def loadZip(self, url, picture_file_name):
+        response  = requests.get(url)
+        zip_buffer = BytesIO(response.content)
+        with ZipFile(zip_buffer, 'r') as zip_ref:
+            return zip_ref.namelist()
 
 
     def wait_for_all_threads(self):
@@ -154,10 +165,14 @@ class getAssignmentInfo:
             sort_order=9
             feedback = self.getFeedback(True)
 
-            if att_file_type in ["png", "pdf", "jpg", "zip", "jpeg"]:  # no word matching, no auto rating
+            if att_file_type in ["png", "pdf", "jpg", "zip", "jpeg", "webp"]:  # no word matching, no auto rating
                 file_name = ( str(submission.id) + "-" + str(attachment.id) + "." + att_file_type )
                 file_name = self.loadPicture( attachment.url, file_name )  # return file name with path
-                sort_order=1
+                sort_order = 2
+                if att_file_type == "zip":
+                    file_content = "click on file name (left)"
+                    sort_order = 1
+
             else:  # anything but a png file, do the word matching
                 response = requests.get(attachment.url, allow_redirects=True)
                 file_content = response.content.decode('utf-8', errors='replace')
