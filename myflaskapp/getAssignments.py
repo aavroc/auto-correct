@@ -144,19 +144,6 @@ class getAssignmentInfo:
         for attachment in submission.attachments:
             att_file_type = Path(attachment.filename).suffix.lower()[1:]
 
-            # if att_file_type not in ["png", "pdf", "jpg", "zip"]: # this are the unrated file types
-
-                # Always show all attachments
-
-                # if ( False or att_file_type != file_type.lower() ):  # does the filename extentsion match the required one?
-                #     print(f"  Skipping { attachment.filename } for { submission.user['name'] }")
-                #     self.warnings.append(f"Skipping { attachment.filename } for { submission.user['name'] } becasue extention does not match (and is not png, pdf or jpg)")
-                #     continue
-
-                # if ( file_name_match != None and file_name_match not in attachment.filename ):  # when defined, check if the filename is correct.
-                #     self.warnings.append(f"Skipping { attachment.filename } for { submission.user['name'] } because file name does not match")
-                #     continue
-
             rating = None
             file_name = None
             file_content = None
@@ -173,10 +160,10 @@ class getAssignmentInfo:
                     file_content = "click on file name (left)"
                     sort_order = 1
 
-            else:  # anything but a png file, do the word matching
+            else:  # anything else, do the word matching
                 response = requests.get(attachment.url, allow_redirects=True)
                 file_content = response.content.decode('utf-8', errors='replace')
-                if (att_file_type == file_type and file_name_match in attachment.filename ): # only perform matching (auto-correct) if file type is requested file type, ToDo test this!
+                if (att_file_type == file_type and (file_name_match is None or file_name_match in attachment.filename) ): # only perform matching (auto-correct) if file type is requested file type, ToDo test this!
                     validation = TextValidation(file_content, words_in_order)
                     words_correct = validation.wordsMatched
                     match = validation.match

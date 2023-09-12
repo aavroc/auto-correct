@@ -171,7 +171,7 @@
                         </td>
                         <td class="col2 top">
                             <textarea id="feedback_{{ loop.index }}" name="feedback[]"
-                                onblur="focusInputField( 'rating_' + '{{ loop.index }}', '{{ item.points_possible }}' )"
+                                onblur="focusInputField( '{{ loop.index }}', '{{ item.points_possible }}', 'rating_', 'feedback_')"
                                 class="" rows="5">{{ item.feedback }}</textarea>
                         </td>
                         <td rowspan="2" class="top">

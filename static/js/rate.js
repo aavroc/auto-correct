@@ -73,27 +73,52 @@ function expandTextField(element) {
     }
 }
 
-function focusInputField(targetId, points_possible) {
-    var target = document.getElementById(targetId);
-    var oldValue = parseFloat(target.value);
+function focusInputField(targetId, points_possible, rating_prefix, comment_prefix ) {
+    var rating = document.getElementById( rating_prefix  + targetId );
+    var feedback = document.getElementById( comment_prefix  + targetId );
+    var oldValue = parseFloat(rating.value);
+
+    if ( feedback.value[0] == '#' ) {
+        referer = feedback.value.slice(1);
+        referer_rating = document.getElementById( rating_prefix  + referer );
+        referer_feedback = document.getElementById( comment_prefix  + referer );
+        if ( referer_rating ) {
+            rating.value = referer_rating.value;
+            feedback.value = referer_feedback.value;
+        }
+        return
+    }
+
+    feedback_words = feedback.value.split(" ");
+    feedback_last_word = feedback_words[feedback_words.length - 1];
+    proposed_score = parseInt(feedback_last_word);
+
+    if (!isNaN(proposed_score) && proposed_score.toString() === feedback_last_word) {
+        rating.value = proposed_score;
+        feedback_words.pop();
+        feedback.value = feedback_words.join(" ");
+        return
+    }
+
+
     if ( oldValue != points_possible ) { // when value is lower than max, don;t change it again
         return
     }
     var newValue = Math.floor(points_possible * 0.25);
 
     if (!isNaN(oldValue)) {
-        target.value = newValue;
+        rating.value = newValue;
 
         var flickeringInterval = setInterval(function () {
-            target.value = (target.value === "") ? newValue : "";
+            rating.value = (rating.value === "") ? newValue : "";
         }, 100);
 
         setTimeout(function () {
             clearInterval(flickeringInterval);
-            target.value = newValue;
-            target.focus();
-            target.select();
-        }, 400);
+            rating.value = newValue;
+            rating.focus();
+            rating.select();
+        }, 300);
     }
 }
 
