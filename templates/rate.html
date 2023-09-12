@@ -197,30 +197,6 @@
 
             </div>
 
-            <!-- <script>
-                 var max_points = {{ item.max_points }};  // Assume this is 10
-
-                // Generate the five links, each with 20% decrement
-                for(var i = 1; i < 5; i++) {
-                    var value = Math.round(max_points - (max_points * 0.2 * i));
-                    var link = $('<a href="#"></a>').text(value);
-
-                    link.attr('onclick', "setFeedbackAndRating('{{ loop.index }}', '{{ item.alt_feedback }}', "+value+")");
-
-                    // Add the class 'button' to each link
-                    link.addClass('button rate');
-
-                    // Attach a click event listener to each link to update the input value
-                    // link.click(function(event) {
-                    //     event.preventDefault();
-                    //     $('#button_rate_'+{{ loop.index }}).val($(this).text());
-                    // });
-
-                    // Append the link to the linkContainer div
-                    $('#chooseRating_'+{{ loop.index }}).append(link).append(' ');  // Adding a space for separation
-                }
-            </script> -->
-
             {% endfor %}
 
             <div class="form-group row text-right">

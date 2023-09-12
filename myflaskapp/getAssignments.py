@@ -137,6 +137,29 @@ class getAssignmentInfo:
             thread.join()
 
 
+    # Formatting the online entries
+    # does not work becuase the content is not clean and contains HTML meta information. Needs to be investigated further.
+    def format_text(self, text):
+        return(text)
+        words = text.split(" ")
+        current_line = ""
+        result = ""
+        
+        for word in words:
+            if len(current_line + word) > 160:
+                result += current_line + "\n"
+                current_line = ""
+            
+            if current_line:
+                current_line += " "
+            current_line += word
+        
+        if current_line:
+            result += current_line
+        
+        return result
+
+    
     def getAttachments(self, submission, file_type, words_in_order, points_possible, file_name_match):
 
         list_of_dicts = []
@@ -199,7 +222,7 @@ class getAssignmentInfo:
         list_of_dicts = []
         sort_order=9
 
-        file_content = submission.body
+        file_content = self.format_text(submission.body)
         validation = TextValidation(file_content, words_in_order)
         words_correct = validation.wordsMatched
         match = validation.match

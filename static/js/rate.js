@@ -92,11 +92,24 @@ function focusInputField(targetId, points_possible, rating_prefix, comment_prefi
     feedback_words = feedback.value.split(" ");
     feedback_last_word = feedback_words[feedback_words.length - 1];
     proposed_score = parseInt(feedback_last_word);
+    name_of_feedback = feedback.value.substring(0, 60);
 
     if (!isNaN(proposed_score) && proposed_score.toString() === feedback_last_word) {
+        // add feedback to drop down
+        itemNr = 1
+        while ( selectElement = document.getElementById( 'comments_' + itemNr ) ) {
+            newOption = document.createElement("option");
+            newOption.value = feedback.value;
+            newOption.text = feedback.value;
+            selectElement.appendChild(newOption);
+            itemNr += 1;
+        } 
+
+        // Fill in proposed score plus remove last interger from feedback
         rating.value = proposed_score;
         feedback_words.pop();
         feedback.value = feedback_words.join(" ");
+
         return
     }
 
@@ -177,6 +190,16 @@ function updateRatingField(itemNr, selectedValue) {
     var ratingId = 'rating_' + itemNr;
     var rating = document.getElementById(ratingId);
 
-    feedback.value = selectedValue;
-    rating.value = 0;
+    feedback_words = selectedValue.split(" ");
+    feedback_last_word = feedback_words[feedback_words.length - 1];
+    proposed_score = parseInt(feedback_last_word);
+
+    if (!isNaN(proposed_score) && proposed_score.toString() === feedback_last_word) {
+        rating.value = proposed_score;
+        feedback_words.pop();
+        feedback.value = feedback_words.join(" ");
+    } else {
+        rating.value = 0;
+        feedback.value = selectedValue;
+    }
 }

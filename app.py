@@ -53,7 +53,7 @@ if not os.path.exists(os.path.dirname(FILE_FORM_DATA)):
 TEST = config.get("TEST")
 print(f"Testing status: {TEST}")
 
-print(f"Version 10-09-23")
+print(f"Version 12-09-23")
 
 
 # Initialize a new Canvas object
