@@ -10,6 +10,7 @@ import threading
 import time
 import re
 import sys
+import json
 
 from zipfile import ZipFile
 from io import BytesIO
@@ -47,7 +48,7 @@ class getAssignmentInfo:
     
     def getAssignmentDataFromCmon(self, cohort, assignment_id):
         url = "http://" + cohort + ".cmon.ovh/api/nakijken?aid=" + assignment_id
-        print(f"Get assignment data from: {url}")
+        print(f"\n\n----\nGet assignment data from: {url}")
         response = requests.get(url)
 
         if response.status_code == 200:
@@ -161,7 +162,7 @@ class getAssignmentInfo:
         return result
 
     
-    def getAttachments(self, submission, file_type, words_in_order, points_possible, file_name_match):
+    def getAttachments(self, submission, file_type, words_in_order, points_possible, file_name_match, php_exe):
 
         list_of_dicts = []
 
@@ -198,7 +199,7 @@ class getAssignmentInfo:
                         rating = 0
                         feedback = self.getFeedback(False)
             
-            if att_file_type == "php":
+            if att_file_type == "php" and int(php_exe):
                 ran_PHP = RunPHP(file_content)
                 php_output = ran_PHP.output
             else:
@@ -279,6 +280,14 @@ class getAssignmentInfo:
         file_name_match = params['file_name']
         att_expected = params["attachments"]
         hint = params.get("hint", "")
+        config_string = params.get("config")
+
+        if (config_string):
+            php_exe = int( json.loads( config_string )['php_exe'] )
+        else:
+            php_exe = 0
+
+        # print(f"PHP_EXE: {php_exe}")
 
         if self.test:
             user = submission.user["name"]
@@ -294,7 +303,7 @@ class getAssignmentInfo:
         if (submission.submission_type == "online_text_entry" ):
             json_attachments = self.getOnlineText(submission, words_in_order, assignment.points_possible)
         else:
-            json_attachments = self.getAttachments(submission, file_type, words_in_order, assignment.points_possible, file_name_match) #  submission object, file_type to check, words to check, max score possible, file_name to match
+            json_attachments = self.getAttachments(submission, file_type, words_in_order, assignment.points_possible, file_name_match, php_exe) #  submission object, file_type to check, words to check, max score possible, file_name to match
 
         #  determine lowest rated attachment and promote rating and feedback to overall rating and feedback
         try:

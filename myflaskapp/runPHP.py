@@ -35,10 +35,10 @@ class RunPHP:
             # Capture the output of the PHP code
             stdout, stderr = process.communicate()
             if process.returncode == 0:
-                print("PHP code OK")
+                # print("PHP code OK")
                 return stdout
             else:
-                print("PHP code error")
+                # print("PHP code error")
                 return stderr
         except Exception as e:
             print("An error occurred while running the PHP code")

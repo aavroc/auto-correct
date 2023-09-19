@@ -30,7 +30,7 @@ class TextValidation:
         # convert = signs as a word seperator
         # words = [s.replace('=', ' ') for s in words]
         # words = [item for item in words if len(item) > 1 or item.isdigit()]
-        words = [s.replace('=', ' = ').replace('==', ' == ') for s in words]
+        # words = [s.replace('=', ' = ').replace('==', ' == ') for s in words]
         print(f"Words to parse: {words}")
 
         output = []
@@ -54,6 +54,8 @@ class TextValidation:
                 output.append(["!", word[1:]])
             else:
                 if status == "normal":
+                    if ( word[0] == "\"" and word[-1] == "\"" ):
+                        word = word[1:-1]
                     output.append(["?", word])
                 elif status == "group":
                     group += " " + word #  add word to group

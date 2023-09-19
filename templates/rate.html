@@ -94,9 +94,9 @@
                                 {{ att.file_content }}
                             </div>
                         </div>
-                    {% else %}
+                    {% else %} <!-- above only show file, below do something with the file -->
 
-                        {% if att.att_file_type == 'php' %}
+                        {% if att.att_file_type == 'php' and att.php_output %} <!-- Ran PHP ? -->
                             <div class="row margin-top-sm">
                                 <div class="col-sm-2"><span class="small-grey">Output</span></div>
                                 <div class="col-sm-10">
@@ -105,7 +105,7 @@
                             </div>
                         {% endif %}
                         
-                        {% if att.att_file_type == 'html' %}
+                        {% if att.att_file_type == 'html' %} <!-- Ran (render) HTML -->
                             <div class="row margin-top-sm">
                                 <div class="col-sm-2"><span class="small-grey">html rendered</span></div>
                                 <div class="col-sm-10">
@@ -113,6 +113,8 @@
                                 </div>
                             </div>
                         {% endif %}
+
+                        <!-- Whatever we have show text and do word matchin -->
 
                         <div class="row margin-top-sm">
                             <div class="col-sm-2"><span class="small-grey">{{ att.org_file_name[:40] }}</span></div>
