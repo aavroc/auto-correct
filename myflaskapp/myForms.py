@@ -1,4 +1,4 @@
-#  used for valdiation in form where 'validation'can be tested
+#  used for valdiation in form where 'validation' can be tested
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, TextAreaField

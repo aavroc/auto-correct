@@ -26,29 +26,37 @@ class TextValidation:
         (self.match, self.wordsMatched) = result
 
     def parseWords(self, words):
+        
+        # convert = signs as a word seperator
+        # words = [s.replace('=', ' ') for s in words]
+        # words = [item for item in words if len(item) > 1 or item.isdigit()]
+        words = [s.replace('=', ' = ').replace('==', ' == ') for s in words]
+        print(f"Words to parse: {words}")
+
         output = []
         status = "normal"
+
         for word in words:
             if word == "":
                 continue
-            if word.startswith("(") or word.startswith("["):
+            if word.startswith("(") or word.startswith("["): # start a group and put first word (minus first char) in group 
                 status = "group"
                 group = word[1:]
-            elif word.endswith(")"):
+            elif word.endswith(")") and status=="group": # if end of a group and if we started a group add last word (minus last char) to group and close group
                 status = "normal"
                 group += " " + word[:-1]
                 output.append(["a", group])
-            elif word.endswith("]"):
+            elif word.endswith("]") and status=="group": #  if end of a group and if we started a group add last word (minus last char) to group and close group
                 status = "normal"
                 group += " " + word[:-1]
                 output.append(["o", group])
-            elif word[0] == "!":
+            elif word[0] == "!": 
                 output.append(["!", word[1:]])
             else:
                 if status == "normal":
                     output.append(["?", word])
                 elif status == "group":
-                    group += " " + word
+                    group += " " + word #  add word to group
 
         return output  # example output: [['?', 'word1'], ['!', 'word2'], ['?', 'word3'], ['a', 'word4 word6 word5']]
 

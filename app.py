@@ -16,6 +16,7 @@ try:
     config_code = open("./config.py").read()
 except Exception as e:
     print(f"An error occurred while reading the file: {e}")
+    time.sleep(5)
     sys.exit()
 
 exec(config_code)
@@ -51,8 +52,8 @@ if not os.path.exists(os.path.dirname(FILE_FORM_DATA)):
     os.makedirs(os.path.dirname(FILE_FORM_DATA))
 
 TEST = config.get("TEST")
-print(f"Testing status: {TEST}")
 
+print(f"Testing status: {TEST}")
 print(f"Version 12-09-23 v2")
 
 
@@ -67,8 +68,13 @@ def temp_image(file_name):
     file_base, file_extension = os.path.splitext(os.path.basename(file_name))
     file_extension = file_extension[1:]
     abs_file_name = os.path.join(application_path,'temp_att/'+file_name)
-    if ( file_extension == 'pdf' ):
-        return send_file(abs_file_name, mimetype='application/pdf')
+    # ToDo HTML return!
+    if ( file_extension == 'html' ):
+        return send_file(abs_file_name, mimetype='text/html' )
+    elif ( file_extension == 'mp4' ):
+        return send_file(abs_file_name, mimetype='video/mp4' )
+    elif ( file_extension == 'pdf' ):
+        return send_file(abs_file_name, mimetype='application/pdf' )
     else:
         return send_file(abs_file_name, mimetype='image/' + file_extension )
 
@@ -246,6 +252,15 @@ def validationtest():
     return render_template(
         "validation.html", form=form, match="-", wordsMatched="-", words=""
     )
+
+
+@app.errorhandler(Exception)
+def handle_error(error):
+    # Get the error message from the exception
+    error_message = str(error)
+    
+    # Render the error page with the error message
+    return render_template('error.html', error_message=error_message), 500
 
 
 if __name__ == '__main__':

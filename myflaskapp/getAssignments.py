@@ -1,4 +1,5 @@
 from myflaskapp.validation import TextValidation
+from myflaskapp.runPHP import RunPHP
 from datetime import datetime
 import requests
 import os
@@ -175,9 +176,10 @@ class getAssignmentInfo:
             sort_order=9
             feedback = self.getFeedback(True)
 
-            if att_file_type in ["png", "pdf", "jpg", "zip", "jpeg", "webp"]:  # no word matching, no auto rating
-                file_name = ( str(submission.id) + "-" + str(attachment.id) + "." + att_file_type )
-                file_name = self.loadPicture( attachment.url, file_name )  # return file name with path
+            file_name = ( str(submission.id) + "-" + str(attachment.id) + "." + att_file_type )
+            file_name = self.loadPicture( attachment.url, file_name )  # return file name with path
+
+            if att_file_type in ["png", "pdf", "jpg", "zip", "jpeg", "webp", "mp4"]:  # no word matching, no auto rating
                 sort_order = 2
                 if att_file_type == "zip":
                     file_content = "click on file name (left)"
@@ -195,6 +197,13 @@ class getAssignmentInfo:
                     else:
                         rating = 0
                         feedback = self.getFeedback(False)
+            
+            if att_file_type == "php":
+                ran_PHP = RunPHP(file_content)
+                php_output = ran_PHP.output
+            else:
+                php_output = None
+
 
             list_of_dicts.append(
                 {
@@ -208,6 +217,7 @@ class getAssignmentInfo:
                     "words_in_order": words_in_order,
                     "number_of_words": len(words_in_order),
                     "sort_order": sort_order,
+                    "php_output" : php_output,
                 }
             )
 
@@ -287,7 +297,11 @@ class getAssignmentInfo:
             json_attachments = self.getAttachments(submission, file_type, words_in_order, assignment.points_possible, file_name_match) #  submission object, file_type to check, words to check, max score possible, file_name to match
 
         #  determine lowest rated attachment and promote rating and feedback to overall rating and feedback
-        max_points = int(assignment.points_possible)
+        try:
+            max_points = int(assignment.points_possible) 
+        except Exception as e:
+            raise Exception("An error occurred: assignment is not configured to be rated with point. Check assignment definition in Canvas.") from e
+
         overall_rating = max_points
         overall_feedback = self.getFeedback(True)
         if att_expected is not None and int(len(submission.attachments)) != int(att_expected):

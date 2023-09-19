@@ -72,14 +72,14 @@
 
                 {% for att in item.attachements %}
 
-                    {% if att.att_file_type in ["png", "jpg", "jpeg", "webp"] %}
+                    {% if att.att_file_type in ['png', 'jpg', 'jpeg', 'webp'] %}
                         <div class="row margin-top-sm">
                             <div class="col-sm-2"><span class="small-grey">{{ att['org_file_name'] }}</span></div>
                             <div class="col-sm-10">
                                 <img src="/{{ att['file_name'] }}" onclick="toggleFullSize(this)" alt="Image">
                             </div>
                         </div>
-                    {% elif att.att_file_type == 'pdf' %}
+                    {% elif att.att_file_type in ['pdf', 'mp4'] %}
                         <div class="row margin-top-sm">
                             <div class="col-sm-2"><span class="small-grey">{{ att['org_file_name'] }}</span></div>
                             <div class="col-sm-10">
@@ -95,12 +95,33 @@
                             </div>
                         </div>
                     {% else %}
+
+                        {% if att.att_file_type == 'php' %}
+                            <div class="row margin-top-sm">
+                                <div class="col-sm-2"><span class="small-grey">Output</span></div>
+                                <div class="col-sm-10">
+                                    <iframe srcdoc="{{ att.php_output }}" width="400" height="100" frameborder="1"></iframe></iframe>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if att.att_file_type == 'html' %}
+                            <div class="row margin-top-sm">
+                                <div class="col-sm-2"><span class="small-grey">html rendered</span></div>
+                                <div class="col-sm-10">
+                                    <iframe src="/{{ att['file_name'] }}" width="800" height="100" frameborder="1"></iframe>
+                                </div>
+                            </div>
+                        {% endif %}
+
                         <div class="row margin-top-sm">
                             <div class="col-sm-2"><span class="small-grey">{{ att.org_file_name[:40] }}</span></div>
                             <div class="col-sm-10">
+                                <!-- Leave this next line as one long line (because of <pre>) -->
                                 <pre id="file_content_{{ loop.index }}" class="textarea" onclick="toggleFullSize(this)">{% if att.att_file_type == 'online' %}{{ att.file_content | safe }}{% else %}{{ att.file_content }}{% endif %}</pre>
                             </div>
                         </div>
+
                         {% if att.words_in_order[0] is defined and att.words_in_order[0] != "" and att.words_correct is not none %}
                             <div class="row margin-top-sm">
                                 <div class="col-sm-2">
@@ -211,6 +232,7 @@
 
         {% else %}
             <h2>Oops...nothing found to rate.</h2>
+            <br><p class="light-grey">Possible an error occured.</p><p class="light-grey">Check the output in the command box where this app is running.</p><hr>
         {% endif %}
 
         <small class="light-grey">

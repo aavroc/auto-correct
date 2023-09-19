@@ -20,7 +20,7 @@ function toggleFullSize(node) {
     node.classList.toggle('fullsize');
 }
 
-function addImage(src, id, text) {
+function XXXaddImage(src, id, text) {
     var img = document.createElement('img');
 
     img.src = src;
@@ -41,7 +41,7 @@ function addImage(src, id, text) {
     
 }
 
-function addPdf(source, id) {
+function XXXaddPdf(source, id) {
     // Create new embed element
     var iframe = document.createElement('iframe');
 
