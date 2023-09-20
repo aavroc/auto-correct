@@ -28,8 +28,8 @@ config = {
             "value": "De vorige feedback is niet verwerkt",
         },
         {
-            "short": "Incomplete browser",
-            "value": "Screenshot is niet van complete browser; URL mist bijvoorbeeld.",
+            "short": "Bijlage niet leesbaar",
+            "value": "Bijlage is geheel of gedeeltelijk niet leesbaar of heeft verkeerd formaat.",
         },
     ],
     "TEST": False,

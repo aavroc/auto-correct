@@ -147,7 +147,7 @@ def update_grade_and_feedback(posted_variables):
     course_id_values = request.form.getlist("course_id[]")
     check_values = request.form.getlist("checked[]")
 
-    # We have 6 lists with all the saem length. All lists will have the same course_id and assignment_id
+    # We have 6 lists with all the same length. All lists will have the same course_id and assignment_id
 
     try:
         course = canvas.get_course(course_id_values[0])
@@ -159,12 +159,14 @@ def update_grade_and_feedback(posted_variables):
     submissions = assignment.get_submissions(include=["user", "submission_comments"])
 
     count = 0
+    
+    output += f"{ assignment.name } \n\n"
 
     for submission in submissions: #  we have to itterate through all submissions of this assignment to find the ones posted
         for i, this_submitted_id in enumerate(submission_id_values): #  these are all posted submissions
             if int(submission.id) == int(this_submitted_id) and int(check_values[i]) == 1: #  when there is a match and we acually want to rate this (check mark checked) we'll rate.
                 count += 1 #  keep a total count, to report back how many in total we have rated
-                output += f"Rate {this_submitted_id}/{submission.attempt} for {submission.user['name']} with {rating_values[i]}, {feedback_values[i]}\n"
+                output += f"Rate {this_submitted_id}/{submission.attempt} for {submission.user['name']} with { rating_values[i] }, { feedback_values[i][:40] }\n"
                 if not TEST:  # next two lines do the actual rating and feedback submision
                     submission.edit(submission={"posted_grade": str(rating_values[i])})
                     submission.edit(comment={"text_comment": feedback_values[i], "attempt": submission.attempt}) #  We have to set the attempt, otherwise it will be none and will be reagerded as 1 (1ste attempt).

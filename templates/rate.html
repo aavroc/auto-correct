@@ -26,6 +26,20 @@
 
 <body>
     <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+                <a href="http://c22.cmon.local/grade/not-graded" class="btn btn-light btn-sm" target="_blank">Nakijk overzicht</a>
+            </div>
+            <div class="col-md-2">
+                <!-- Create a new button linked to the dynamic URL -->
+                {% if data[0] is defined %}
+                    <a href="https://c23.cmon.ovh/nakijken/update?assignment_id={{ data[0]['assignment_id'] }}" class="btn btn-light btn-sm" target="_blank">Edit Parameters</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
         {% if data[0] is defined %}
         <form action="/submit-ratings" method="POST">
 
