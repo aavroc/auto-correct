@@ -20,7 +20,7 @@ function toggleFullSize(node) {
     node.classList.toggle('fullsize');
 }
 
-function addImage(src, id, text) {
+function XXXaddImage(src, id, text) {
     var img = document.createElement('img');
 
     img.src = src;
@@ -41,7 +41,7 @@ function addImage(src, id, text) {
     
 }
 
-function addPdf(source, id) {
+function XXXaddPdf(source, id) {
     // Create new embed element
     var iframe = document.createElement('iframe');
 
@@ -73,24 +73,65 @@ function expandTextField(element) {
     }
 }
 
-function focusInputField(targetId, points_possible) {
-    var target = document.getElementById(targetId);
-    var oldValue = parseFloat(target.value);
+function focusInputField(targetId, points_possible, rating_prefix, comment_prefix ) {
+    var rating = document.getElementById( rating_prefix  + targetId );
+    var feedback = document.getElementById( comment_prefix  + targetId );
+    var oldValue = parseFloat(rating.value);
+
+    if ( feedback.value[0] == '#' ) {
+        referer = feedback.value.slice(1);
+        referer_rating = document.getElementById( rating_prefix  + referer );
+        referer_feedback = document.getElementById( comment_prefix  + referer );
+        if ( referer_rating ) {
+            rating.value = referer_rating.value;
+            feedback.value = referer_feedback.value;
+        }
+        return
+    }
+
+    feedback_words = feedback.value.split(" ");
+    feedback_last_word = feedback_words[feedback_words.length - 1];
+    proposed_score = parseInt(feedback_last_word);
+    name_of_feedback = feedback.value.substring(0, 60);
+
+    if (!isNaN(proposed_score) && proposed_score.toString() === feedback_last_word) {
+        // add feedback to drop down
+        itemNr = 1
+        while ( selectElement = document.getElementById( 'comments_' + itemNr ) ) {
+            newOption = document.createElement("option");
+            newOption.value = feedback.value;
+            newOption.text = feedback.value;
+            selectElement.appendChild(newOption);
+            itemNr += 1;
+        } 
+
+        // Fill in proposed score plus remove last interger from feedback
+        rating.value = proposed_score;
+        feedback_words.pop();
+        feedback.value = feedback_words.join(" ");
+
+        return
+    }
+
+
+    if ( oldValue != points_possible ) { // when value is lower than max, don;t change it again
+        return
+    }
     var newValue = Math.floor(points_possible * 0.25);
 
     if (!isNaN(oldValue)) {
-        target.value = newValue;
+        rating.value = newValue;
 
         var flickeringInterval = setInterval(function () {
-            target.value = (target.value === "") ? newValue : "";
+            rating.value = (rating.value === "") ? newValue : "";
         }, 100);
 
         setTimeout(function () {
             clearInterval(flickeringInterval);
-            target.value = newValue;
-            target.focus();
-            target.select();
-        }, 1200);
+            rating.value = newValue;
+            rating.focus();
+            rating.select();
+        }, 300);
     }
 }
 
@@ -122,16 +163,23 @@ function setFeedbackAndRating(itemNr, alt_feedback, maxRating) {
 }
 
 function decreaseValue(inputField, maxValue) {
-    var currentValue = parseInt(inputField.value, 10);
-    
-    if (currentValue === 0) {
-        inputField.value = maxValue;
+    var currentValue = parseInt( inputField.value, 10 );
+    var maxValue = parseInt( maxValue );
+
+    if ( maxValue > 5 ) {
+        step = 2;
     } else {
-        if ( currentValue > 15 ) {
-            inputField.value = currentValue - 2;
+        step = 1;
+    }
+    
+    if ( currentValue + step > maxValue ) {
+        if ( currentValue != maxValue ) {
+            inputField.value = maxValue;
         } else {
-            inputField.value = currentValue - 1;
+            inputField.value = 0;
         }
+    } else {
+        inputField.value = currentValue + step;
     }
 }
 
@@ -142,6 +190,16 @@ function updateRatingField(itemNr, selectedValue) {
     var ratingId = 'rating_' + itemNr;
     var rating = document.getElementById(ratingId);
 
-    feedback.value = selectedValue;
-    rating.value = 0;
+    feedback_words = selectedValue.split(" ");
+    feedback_last_word = feedback_words[feedback_words.length - 1];
+    proposed_score = parseInt(feedback_last_word);
+
+    if (!isNaN(proposed_score) && proposed_score.toString() === feedback_last_word) {
+        rating.value = proposed_score;
+        feedback_words.pop();
+        feedback.value = feedback_words.join(" ");
+    } else {
+        rating.value = 0;
+        feedback.value = selectedValue;
+    }
 }

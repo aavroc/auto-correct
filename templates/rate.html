@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/rate.css') }}">
     <script src="/static/js/rate.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
 
     </style>
@@ -24,6 +25,20 @@
 </head>
 
 <body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-2">
+                <a href="http://c22.cmon.local/grade/not-graded" class="btn btn-light btn-sm" target="_blank">Nakijk overzicht</a>
+            </div>
+            <div class="col-md-2">
+                <!-- Create a new button linked to the dynamic URL -->
+                {% if data[0] is defined %}
+                    <a href="https://c23.cmon.ovh/nakijken/update?assignment_id={{ data[0]['assignment_id'] }}" class="btn btn-light btn-sm" target="_blank">Edit Parameters</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         {% if data[0] is defined %}
         <form action="/submit-ratings" method="POST">
@@ -71,14 +86,14 @@
 
                 {% for att in item.attachements %}
 
-                    {% if att.att_file_type in ['png', 'jpg'] %}
+                    {% if att.att_file_type in ['png', 'jpg', 'jpeg', 'webp'] %}
                         <div class="row margin-top-sm">
                             <div class="col-sm-2"><span class="small-grey">{{ att['org_file_name'] }}</span></div>
                             <div class="col-sm-10">
                                 <img src="/{{ att['file_name'] }}" onclick="toggleFullSize(this)" alt="Image">
                             </div>
                         </div>
-                    {% elif att.att_file_type == 'pdf' %}
+                    {% elif att.att_file_type in ['pdf', 'mp4'] %}
                         <div class="row margin-top-sm">
                             <div class="col-sm-2"><span class="small-grey">{{ att['org_file_name'] }}</span></div>
                             <div class="col-sm-10">
@@ -86,14 +101,44 @@
                                 <a href="/{{ att['file_name'] }}" class="small-link" target="_blank">Open PDF</a>
                             </div>
                         </div>
-                    {% else %}
+                    {% elif att.att_file_type == 'zip' %}
+                        <div class="row margin-top-sm">
+                            <div class="col-sm-2"><a  href="/{{ att['file_name'] }}" class="small-grey">{{ att['org_file_name'] }}</a></div>
+                            <div class="col-sm-10">
+                                {{ att.file_content }}
+                            </div>
+                        </div>
+                    {% else %} <!-- above only show file, below do something with the file -->
+
+                        {% if att.att_file_type == 'php' and att.php_output %} <!-- Ran PHP ? -->
+                            <div class="row margin-top-sm">
+                                <div class="col-sm-2"><span class="small-grey">Output</span></div>
+                                <div class="col-sm-10">
+                                    <iframe srcdoc="{{ att.php_output }}" width="400" height="100" frameborder="1"></iframe></iframe>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        {% if att.att_file_type == 'html' %} <!-- Ran (render) HTML -->
+                            <div class="row margin-top-sm">
+                                <div class="col-sm-2"><span class="small-grey">html rendered</span></div>
+                                <div class="col-sm-10">
+                                    <iframe src="/{{ att['file_name'] }}" width="800" height="100" frameborder="1"></iframe>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Whatever we have show text and do word matchin -->
+
                         <div class="row margin-top-sm">
                             <div class="col-sm-2"><span class="small-grey">{{ att.org_file_name[:40] }}</span></div>
                             <div class="col-sm-10">
+                                <!-- Leave this next line as one long line (because of <pre>) -->
                                 <pre id="file_content_{{ loop.index }}" class="textarea" onclick="toggleFullSize(this)">{% if att.att_file_type == 'online' %}{{ att.file_content | safe }}{% else %}{{ att.file_content }}{% endif %}</pre>
                             </div>
                         </div>
-                        {% if att.words_in_order[0] is defined and att.words_in_order[0] != "" %}
+
+                        {% if att.words_in_order[0] is defined and att.words_in_order[0] != "" and att.words_correct is not none %}
                             <div class="row margin-top-sm">
                                 <div class="col-sm-2">
                                     {% if att.number_of_words == att.words_correct %}
@@ -105,7 +150,7 @@
                                 <div class="col-sm-8" class="read-only-box">
                                    
                                         {% for word in att.words_in_order %}
-                                            {% if loop.index <= att.words_correct %}
+                                            {% if att.words_correct is not none and loop.index <= att.words_correct %}
                                                     <span style="font-weight:bold;color:green;">{{word }}</span>
                                                 {% else %}
                                                     <span style="font-weight:bold;color:red;">{{ word }}</span>
@@ -141,6 +186,7 @@
                                     <a class="button rate" id="button_rate_{{ loop.index }}"  onclick="setFeedbackAndRating('{{ loop.index }}',
                                         '{{ item.alt_feedback }}', '{{ item.max_points }}')">Correct</a>
                                 {% endif %}
+                                <!-- <span id="chooseRating_{{ loop.index }}"></span> -->
                                 (Attempt {{ item.attempt }}, Max points {{ item.max_points }}/{{ item.points_possible }})
                             </span>
                         </td>
@@ -162,7 +208,7 @@
                         </td>
                         <td class="col2 top">
                             <textarea id="feedback_{{ loop.index }}" name="feedback[]"
-                                onblur="focusInputField( 'rating_' + '{{ loop.index }}', '{{ item.points_possible }}' )"
+                                onblur="focusInputField( '{{ loop.index }}', '{{ item.points_possible }}', 'rating_', 'feedback_')"
                                 class="" rows="5">{{ item.feedback }}</textarea>
                         </td>
                         <td rowspan="2" class="top">
@@ -186,8 +232,6 @@
                     <tr>
                 </table>
 
-
-
             </div>
 
             {% endfor %}
@@ -204,7 +248,19 @@
 
         {% else %}
             <h2>Oops...nothing found to rate.</h2>
+            <br><p class="light-grey">Possible an error occured.</p><p class="light-grey">Check the output in the command box where this app is running.</p><hr>
         {% endif %}
+
+        <small class="light-grey">
+            {% if (time_elapsed) %}
+                page retrieved in {{ time_elapsed | int }} ms
+                <br>
+            {% endif %}
+            {% for warning in warnings %}
+                {{ warning }}<br>
+            {% endfor %}
+        </small>
+        <br><br><br>
 
     </div>
 
